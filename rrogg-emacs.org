@@ -31,6 +31,17 @@ Display no GUI components other than the =modline=.
 (scroll-bar-mode -1)
 #+end_src
 
+* Wrap Lines at a Reasonable Width
+
+Long lines of text are wrapped at a width of 80 characters. In order to leave
+long code lines untouched, automatic line wrap is only active in =text-mode= and
+modes which inherit from it, like =org-mode=.
+
+#+begin_src emacs-lisp
+(setq-default fill-column 80)
+(add-hook 'text-mode-hook 'auto-fill-mode)
+#+end_src
+
 * Outro
 ** Final Spurt
 
