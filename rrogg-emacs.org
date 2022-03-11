@@ -1,0 +1,23 @@
+#+TITLE: RROGG-EMACS - AN EMACS CONFIGURATION
+#+PROPERTY: header-args :result silent :tangle "~/.emacs.d/init.el" :eval no-export :comments org
+
+* Intro
+** Track Loading Time of rrogg-emacs
+
+Starting Emacs has to be as quick as possible. In order to evaluate the time it
+takes to load =rrogg-emacs.org=, someone has to blow the whistle and start the
+stopwatch.
+
+#+begin_src emacs-lisp
+(defvar rrogg-emacs-start-time (current-time) "Time when rrogg-emacs was started")
+#+end_src
+
+* Outro
+** Final Spurt
+
+This is the end of =rrogg-emacs.org=. Let's see how much time it took to load
+all of the shenanigans. Write the result to the =Messages= buffer.
+
+#+begin_src emacs-lisp
+(message "→★ Finished loading rrogg-emacs in %.2fs" (float-time (time-subtract (current-time) rrogg-emacs-start-time)))
+#+end_src
