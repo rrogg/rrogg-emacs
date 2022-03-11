@@ -12,6 +12,15 @@ stopwatch.
 (defvar rrogg-emacs-start-time (current-time) "Time when rrogg-emacs was started")
 #+end_src
 
+* Maximize Frame
+
+The Emacs frame is maximized at all times to make use of every pixel on the
+screen.
+
+#+begin_src emacs-lisp
+(toggle-frame-maximized)
+#+end_src
+
 * Outro
 ** Final Spurt
 
