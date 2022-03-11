@@ -74,6 +74,20 @@ Unix uses just line feed ("\n").
 (setq locale-coding-system 'utf-8)
 #+end_src
 
+* Save Commands Across Sessions
+
+Emacs doesn't have a persistent command history by default. The build-in history
+gets resetted with every new Emacs session. The package =savehist= implements a
+session independent history.
+
+#+begin_src emacs-lisp
+(setq savehist-file (locate-user-emacs-file "savehist"))
+(setq history-length 10000)
+(setq history-delete-duplicates t)
+(setq savehist-save-minibuffer-history t)
+(add-hook 'after-init-hook #'savehist-mode)
+#+end_src
+
 * Outro
 ** Final Spurt
 
