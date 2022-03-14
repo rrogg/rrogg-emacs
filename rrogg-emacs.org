@@ -121,6 +121,45 @@ scenarios.
 (setq uniquify-after-kill-buffer-p t)
 #+end_src
 
+* Managing Buffers
+
+By default =C-x C-b= calls the Buffer List. IBuffer is an alternative with more
+functionality when it comes to manipulate the buffer list and switching
+buffers.
+It can filter the buffer list in various ways, execute =occur= or
+=query-replace= commands straight from the list and much more.
+Check =C-h m= while in IBuffer and read it's help.
+A demonstration of it's capabilities can be observed in Protesilaos Stavrou's
+video [[http://192.168.178.110:3000/watch?v=6KN_oSLFf-k][Emacs: introduction to IBUFFER]].
+
+The format of IBuffer is changed so that the name column gets elided after 40
+characters instead of the default 16 to make longer buffer names readable.
+
+#+begin_src emacs-lisp
+(setq ibuffer-expert t)
+(setq ibuffer-display-summary nil)
+(setq ibuffer-use-other-window nil)
+(setq ibuffer-show-empty-filter-groups nil)
+(setq ibuffer-movement-cycle nil)
+(setq ibuffer-default-sorting-mode 'filename/process)
+(setq ibuffer-use-header-line t)
+(setq ibuffer-default-shrink-to-minimum-size nil)
+(setq ibuffer-saved-filter-groups nil)
+(setq ibuffer-old-time 48)
+(setq ibuffer-formats
+        '((mark modified read-only locked " "
+                (name 40 40 :left :elide)
+                " "
+                (size 9 -1 :right)
+                " "
+                (mode 16 16 :left :elide)
+                " " filename-and-process)
+          (mark " "
+                (name 16 -1)
+                " " filename)))
+(define-key global-map (kbd "C-x C-b") #'ibuffer)
+#+end_src
+
 * Outro
 ** Final Spurt
 
