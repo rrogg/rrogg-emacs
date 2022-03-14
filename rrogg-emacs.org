@@ -108,6 +108,19 @@ session independent history.
 (add-hook 'after-init-hook #'savehist-mode)
 #+end_src
 
+* Unique Buffer Names
+
+Dealing with multiple files of identical name from different directories is
+sometimes confusing. Working with multiple main.cpp files is one example.
+The builtin =uniquify= package makes it easier to identify the files in such
+scenarios.
+
+#+begin_src emacs-lisp
+(setq uniquify-buffer-name-style 'forward)
+(setq uniquify-strip-common-suffix t)
+(setq uniquify-after-kill-buffer-p t)
+#+end_src
+
 * Outro
 ** Final Spurt
 
