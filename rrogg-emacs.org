@@ -46,6 +46,26 @@ thought. The welcome message isn't needed, so it gets disabled.
 (setq initial-scratch-message nil)
 #+end_src
 
+* Display Current Time and Date
+
+While I use Emacs exclusively full screen, no user interface elements like
+taskbars are visible that could offer space for useful information like the
+current time and date.
+
+A solution for that is the builtin =display-time-mode=.
+Once enabled, this mode displays time and date in the modeline.
+
+A caveat of placing that info on the modeline, is information duplication. The
+time will be shown on the modeline of every open buffer.
+Ideally there would be only one "universal bar" that holds such universal info.
+
+#+begin_src emacs-lisp
+(setq display-time-format "%a %e %b, %H:%M")
+(setq display-time-interval 60)
+(setq display-time-default-load-average nil)
+(add-hook 'after-init-hook #'display-time-mode)
+#+end_src
+
 * Wrap Lines at a Reasonable Width
 
 Long lines of text are wrapped at a width of 80 characters. In order to leave
