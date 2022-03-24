@@ -160,6 +160,72 @@ characters instead of the default 16 to make longer buffer names readable.
 (define-key global-map (kbd "C-x C-b") #'ibuffer)
 #+end_src
 
+* Package Management
+
+Most extensions to Emacs can be loaded from archives, which are accessible via
+Emacs' very own package manager =package.el=. To use this feature, =package.el=
+needs to know, which archives it should use.
+Out of the box, Emacs includes the =GNU ELPA= archive. It contains packages
+conform with the terms of the Free Software Foundation.
+
+To handle the package management, =package.el= has to be required early.
+
+#+begin_src emacs-lisp
+(require 'package)
+#+end_src
+
+Installing external packages that can be found in one of the Emacs Lisp Package
+Archives is not an automatic process by default. The variable
+=rrogg-emacs-autoinstall= has to be true in order to enable autoinstall.
+A list of packages that =rrogg-emacs= tries to configure but are not installed will
+be populated by the macro =rrogg-emacs-elpa-package=.
+Those packages can be installed by running the function
+=rrogg-emacs-install-missing-packages=.
+
+#+begin_src emacs-lisp
+(defvar rrogg-emacs-autoinstall nil
+  "Control if `rrogg-emacs-elpa-package' should install packages automatically.
+A value of nil will disable automatic installation of missing packages.
+A non-nil value will install missing packages automatically without asking the user for consent.")
+
+(defvar rrogg-emacs-missing-packages-list nil
+  "List of package names that are required in rrogg-emacs, but currently not installed.")
+
+(defun rrogg-emacs-install-missing-packages ()
+  "Install all packages from the `rrogg-emacs-missing-packages-list'."
+  (interactive)
+  (when (yes-or-no-p (format "Try to install %d packages?"
+                             (length rrogg-emacs-missing-packages-list)))
+    (package-refresh-contents)
+    (mapc (lambda (package)
+            (unless (package-installed-p package)
+              (package-install package)))
+          rrogg-emacs-missing-packages-list)))
+#+end_src
+
+Packages that are not shipped with Emacs or are not additions from me for
+standard packages, are loaded and configured via =rrogg-emacs-elpa-package=. If
+those have not been installed yet, they are marked for installation by
+explicitly running =rrogg-emacs-install-missing-packages= or installed
+automatically if =rrogg-emacs-autoinstall= is non-nil. If the package is
+installed already, it gets loaded and configured with the settings passed to the
+macro.
+
+#+begin_src emacs-lisp
+(defmacro rrogg-emacs-elpa-package (package &rest body)
+  "Set up PACKAGE installed from one of the `package-archives' with the rest BODY.
+PACKAGE is a quoted symbol ('package) and BODY consists of balanced expressions (setq variable value)."
+  `(progn
+     (when (and rrogg-emacs-autoinstall
+                (not (package-installed-p ,package)))
+       (package-install ,package))
+     (if (require ,package nil 'noerror)
+         (progn ,@body)
+       (display-warning 'rrogg-emacs (format "Loading package `%s' failed" ,package) :warning)
+       (add-to-list 'rrogg-emacs-missing-packages-list ,package)
+       (display-warning 'rrogg-emacs (format "Run `rrogg-emacs-install-missing-packages' to install all missing packages listed in `rrogg-emacs-missing-packages-list'") :warning))))
+#+end_src
+
 * Outro
 ** Final Spurt
 
