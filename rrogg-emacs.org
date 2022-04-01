@@ -258,6 +258,68 @@ need to be set prior to the loading of the theme.
   (modus-themes-load-vivendi))
 #+end_src
 
+* Fonts
+
+#+begin_src emacs-lisp
+(defvar rrogg-emacs-typeface-history ()
+  "Minibuffer history for `rrogg-emacs-typefaces-prompt'.")
+
+(defun rrogg-emacs-typefaces-prompt ()
+  "Select installed font."
+  (let ((default (nth 1 rrogg-emacs-typeface-history)))
+    (completing-read
+     (format "Select typeface [%s]: " default)
+     (sort
+      (delete-dups
+       (funcall 'font-family-list))
+      'string-lessp)
+     nil t nil 'rrogg-emacs-typeface-history default)))
+
+(defvar rrogg-emacs-typeface-weight-history ()
+  "Minibuffer history for `rrogg-emacs-typeface-weights-prompt'.")
+
+(defun rrogg-emacs-typeface-weights-prompt (family)
+  "Select weight for font FAMILY."
+  (let ((default (nth 1 rrogg-emacs-typeface-weight-history)))
+    (completing-read
+     (format "Select weight [%s]: " default)
+     (sort (seq-uniq (mapcar (lambda (x) (elt x 3)) (x-family-fonts family))) 'string-lessp)
+     nil t nil 'rrogg-emacs-typeface-weight-history default)))
+
+(defvar rrogg-emacs-typeface-height-history ()
+  "Minibuffer history for `rrogg-emacs-typeface-heights-prompt'.")
+
+(defvar rrogg-emacs-font-heights
+  '(80 85 90 95 100 105 110 120 130 140 150 160 170 180)
+  "List of font heights.")
+
+(defun rrogg-emacs-typeface-heights-prompt ()
+  "Select height for font."
+  (let ((default (nth 1 rrogg-emacs-typeface-height-history)))
+    (string-to-number
+     (completing-read
+      (format "Select height [%s]: " default)
+      (mapcar #'number-to-string rrogg-emacs-font-heights)
+      nil nil nil 'rrogg-emacs-typeface-height-history default))))
+
+(defun rrogg-emacs-set-face-attribute (face family weight height)
+  "Set FAMILY, WEIGHT and HEIGHT for FACE."
+  (internal-set-lisp-face-attribute face :family family 0)
+  (internal-set-lisp-face-attribute face :weight weight 0)
+  (internal-set-lisp-face-attribute face :height height 0))
+
+(defun rrogg-emacs-set-default-font (font weight height)
+  "Change `default' face family to FONT with WEIGHT and HEIGHT."
+  (interactive
+   (let* ((font (rrogg-emacs-typefaces-prompt))
+          (weight (intern (rrogg-emacs-typeface-weights-prompt font)))
+          (height (rrogg-emacs-typeface-heights-prompt)))
+     (list font weight height)))
+  (rrogg-emacs-set-face-attribute 'default font weight height))
+
+(rrogg-emacs-set-face-attribute 'default "Hack" 'regular 120)
+#+end_src
+
 * Outro
 ** Final Spurt
 
