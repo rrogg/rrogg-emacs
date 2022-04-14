@@ -369,6 +369,24 @@ word and no active region invoke `ispell-word'."
     (call-interactively 'ispell-word))))
 #+end_src
 
+* Backup Files
+
+Emacs automatically creates backups of files, usually in
+=.emacs.d/var/backup/=. I like to locate them a little bit more obvious in the
+root of the Emacs user directory. This should help me finding them easier in
+case I need them.
+
+#+begin_src emacs-lisp
+(setq backup-directory-alist
+      `(("." . ,(concat user-emacs-directory "backup/"))))
+(setq backup-by-copying t)
+(setq version-control t)
+(setq delete-old-versions t)
+(setq kept-new-versions 6)
+(setq kept-old-versions 2)
+(setq create-lockfiles nil)
+#+end_src
+
 * Outro
 ** Final Spurt
 
