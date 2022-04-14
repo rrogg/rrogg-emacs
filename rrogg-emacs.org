@@ -320,6 +320,55 @@ need to be set prior to the loading of the theme.
 (rrogg-emacs-set-face-attribute 'default "Hack" 'regular 120)
 #+end_src
 
+* Spellchecking
+
+Checking text for spelling will typically occur for German and English.
+Switching between the =aspell= dictionaries can be done via
+=rrogg-emacs-spell-change-dictionary=.
+=rrogg-emacs-spell= checks the active region or the word at point against the
+dictionary.
+
+#+begin_src emacs-lisp
+(defvar rrogg-emacs-spell-dictionaries
+  '(("EN English" . "en")
+    ("DE Deutsch" . "de_DE")
+    ("FR Français" . "fr"))
+  "Alist of strings with dictionary descriptions and dictionary keys.
+Used by `rrogg-emacs-spell-change-dictionary'.")
+
+(defvar rrogg-emacs-spell-dictionary-hist '()
+  "Input history for `rrogg-emacs-spell-change-dictionary'.")
+
+(defun rrogg-emacs-spell-dictionary-prompt ()
+  "Helper prompt to select from `rrogg-emacs-spell-dictionaries'."
+  (let ((default (car rrogg-emacs-spell-dictionary-hist)))
+    (completing-read
+     (format "Select dictionary [%s]: " default)
+     (mapcar #'car rrogg-emacs-spell-dictionaries)
+     nil t nil 'rrogg-emacs-spell-dictionary-hist default)))
+
+(defun rrogg-emacs-spell-change-dictionary (dictionary)
+  "Select a DICTIONARY from `rrogg-emacs-spell-dictionaries'."
+  (interactive
+   (list (rrogg-emacs-spell-dictionary-prompt)))
+  (let* ((key (cdr (assoc dictionary rrogg-emacs-spell-dictionaries)))
+         (description (car (assoc dictionary rrogg-emacs-spell-dictionaries))))
+    (ispell-change-dictionary key)
+    (message "Switched dictionary to %s" (propertize description 'face 'bold))))
+
+(defun rrogg-emacs-spell (beg end)
+  "Spellcheck between BEG END or current word.
+
+Use `flyspell-region' on the active region.  With point over a
+word and no active region invoke `ispell-word'."
+  (interactive "r")
+  (cond
+   ((use-region-p)
+    (flyspell-region beg end))
+   ((thing-at-point 'word)
+    (call-interactively 'ispell-word))))
+#+end_src
+
 * Outro
 ** Final Spurt
 
