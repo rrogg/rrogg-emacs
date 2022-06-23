@@ -460,6 +460,75 @@ The body of the message is wrapped at length 72.
 (add-hook 'git-commit-setup-hook #'rrogg-emacs-git-commit-setup)
 #+end_src
 
+* Org Mode
+
+#+begin_src emacs-lisp
+(setq org-directory (convert-standard-filename "~/org/"))
+;; general
+(setq org-adapt-indentation nil)
+;; tasks
+(setq org-todo-keywords
+      '((sequence "NEXT(n)" "WAITING(w)" "CALL(c)" "VISIT(v)" "TRAVEL(t)" "PLANNING(p)" "STARTED(s)" "HOLD(h)" "|" "DONE(d)" "CANCELLED(C)" "NOPART(N)")))
+(setq org-use-fast-todo-selection 'expert)
+;; IDs
+(require 'org-id)
+(setq org-id-link-to-org-use-id
+      'create-if-interactive-and-no-custom-id)
+;; capture
+(setq rrogg-emacs-capture-template-task "* NEXT %?
+:LOGBOOK:
+:CREATED: %U
+:END:
+%a
+
+
+")
+(setq org-capture-templates `(("t" "Task" entry (file rrogg-emacs-org-default-refile-file)
+                               ,rrogg-emacs-capture-template-task)))
+(add-hook 'org-capture-prepare-finalize-hook #'org-id-get-create)
+;; refile
+(setq rrogg-emacs-org-default-refile-file (concat org-directory "refile.org")) ;; Move to seperate file, add description for describe function
+(setq org-refile-targets
+      '((org-agenda-files . (:maxlevel . 9))
+        (nil . (:maxlevel . 9))))
+(setq org-refile-use-outline-path t)
+(setq org-refile-allow-creating-parent-nodes 'confirm)
+(setq org-refile-use-cache t)
+;; logging
+(setq org-log-refile 'time)
+(setq org-log-reschedule 'time)
+(setq org-log-redeadline 'time)
+(setq org-log-done 'time)
+(setq org-log-into-drawer t)
+(setq org-treat-S-cursor-todo-selection-as-state-change nil)
+;; agenda
+(setq org-agenda-files (directory-files-recursively org-directory "\\.org$"))
+(setq org-agenda-window-setup 'current-window)
+(setq org-agenda-span 'week)
+(setq org-agenda-start-on-weekday 1)
+(setq org-agenda-time-grid
+        '((daily today require-timed)
+          (0600 0800 1000 1200 1400
+		1600 1800 2000 2200)
+          " ....." "-----------------"))
+(setq org-agenda-prefix-format
+      '((agenda . " %-12:c%?-12t")
+        (todo . " %i %-12:c")
+        (tags . " %i %-12:c")
+        (search . " %i %-12:c")))
+;; code blocks
+(setq org-src-window-setup 'current-window)
+(setq org-confirm-babel-evaluate nil)
+(setq org-src-fontify-natively t)
+(setq org-src-tab-acts-natively t)
+(setq org-src-preserve-indentation t)
+;; key bindings
+(let ((map global-map))
+  (define-key map (kbd "C-c a") #'org-agenda)
+  (define-key map (kbd "C-c c") #'org-capture)
+  (define-key map (kbd "C-c l") #'org-store-link))
+#+end_src
+
 * Outro
 ** Final Spurt
 
