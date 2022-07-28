@@ -460,6 +460,39 @@ The body of the message is wrapped at length 72.
 (add-hook 'git-commit-setup-hook #'rrogg-emacs-git-commit-setup)
 #+end_src
 
+* PDF
+
+There are currently some issues with =pdf-tools-install= ([2022-07-27]).
+Building the =epdfinfo= fails ([[https://github.com/politza/pdf-tools/issues/709#issuecomment-1174055858][issue]]), but pointing to the build directory
+manually does work:
+
+#+begin_example
+(pdf-tools-build-server (expand-file-name (concat user-emacs-directory "elpa/pdf-tools-1.0")) nil nil nil (expand-file-name (concat user-emacs-directory "elpa/pdf-tools-1.0/server")))
+#+end_example
+
+Let's simplify that with a wrapper function around the call.
+
+#+begin_src emacs-lisp
+(defun rrogg-emacs-build-epdfinfo-manually ()
+  "Builds epdfinfo for pdf-tools manually."
+  (pdf-tools-build-server (expand-file-name (concat user-emacs-directory "elpa/pdf-tools-1.0")) nil nil nil (expand-file-name (concat user-emacs-directory "elpa/pdf-tools-1.0/server"))))
+#+end_src
+
+It works if one also changes the autobuild file for the server ([[https://github.com/vedang/pdf-tools/issues/102#issuecomment-1120857854][issue]]).
+In =~/.emacs.d/elpa/pdf-tools-1.0/server/autobuild=, add "CXXFLAGS='-std=c++17'"
+after "./configure":
+
+#+begin_example
+Before: eval "./configure -q $(quote "$prefix") && make clean && make -s || exit_fail"
+After: eval "./configure CXXFLAGS='-std=c++17' -q $(quote "$prefix") && make clean && make -s || exit_fail"
+#+end_example
+
+#+begin_src emacs-lisp
+(rrogg-emacs-elpa-package 'pdf-tools
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-page))
+#+end_src
+
 * Org Mode
 
 #+begin_src emacs-lisp
