@@ -165,13 +165,23 @@ characters instead of the default 16 to make longer buffer names readable.
 Most extensions to Emacs can be loaded from archives, which are accessible via
 Emacs' very own package manager =package.el=. To use this feature, =package.el=
 needs to know, which archives it should use.
-Out of the box, Emacs includes the =GNU ELPA= archive. It contains packages
-conform with the terms of the Free Software Foundation.
 
 To handle the package management, =package.el= has to be required early.
 
 #+begin_src emacs-lisp
 (require 'package)
+#+end_src
+
+Out of the box, Emacs includes the =GNU ELPA= archive. It contains packages
+conform with the terms of the Free Software Foundation.
+=NONGNU= and =MELPA= are added to the archive list.
+
+#+begin_src emacs-lisp
+(setq package-archives
+      '(("elpa" . "https://elpa.gnu.org/packages/")
+        ("elpa-devel" . "https://elpa.gnu.org/devel/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+        ("melpa" . "https://melpa.org/packages/")))
 #+end_src
 
 Installing external packages that can be found in one of the Emacs Lisp Package
@@ -492,6 +502,19 @@ After: eval "./configure CXXFLAGS='-std=c++17' -q $(quote "$prefix") && make cle
   (pdf-tools-install)
   (setq-default pdf-view-display-size 'fit-page))
 #+end_src
+
+* eBooks
+
+Emacs can't render the epub format out of the box. A package called =nov.el=
+adds support for it.
+
+#+begin_src emacs-lisp
+(rrogg-emacs-elpa-package 'nov
+  (setq nov-text-width 80)
+  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
+#+end_src
+
+=nov.el= requires the Linux package =unzip= to be installed.
 
 * Org Mode
 
