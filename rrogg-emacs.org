@@ -516,6 +516,37 @@ adds support for it.
 
 =nov.el= requires the Linux package =unzip= to be installed.
 
+* Word-processing
+
+Utilizing LaTeX to produce perfect letters and other documents for printing and
+sharing through the org mode export feature is a huge deal. Ideally all of the
+LaTeX syntax for a document is hidden away in the settings and especially in lco
+files. Just adding lco's via =#+LCO:= shall be enough additional code besides
+the actual content of the document.
+The lco's for a Linux system are located in =~/texmf/tex/latex/=.
+On Windows systems, the lco's have to be placed in the folder
+=C:\texlive\texmf-local\tex\latex=. Sometimes it is necessary to use the command
+=mktexlsr= in =cmd.exe= when a new lco is added to this folder. I had some
+problems setting this up, but [[https://orgmode.org/worg/exporters/koma-letter-export.html#org08cc3a][this section]] has been a great help.
+For a clean and frictionless letter writing experience the org export template
+has to be as minimal as possible.
+
+#+BEGIN_SRC emacs-lisp
+(eval-after-load 'ox '(require 'ox-koma-letter))
+(eval-after-load 'ox-koma-letter
+  '(progn
+     (add-to-list 'org-latex-classes
+                  '("rrogg/letter"
+                    "\\documentclass\{scrlttr2\}
+     [NO-DEFAULT-PACKAGES]
+     [NO-PACKAGES]
+     [NO-EXTRA]"))
+     (setq org-koma-letter-default-class "rrogg/letter")))
+(setq org-latex-hyperref-template "")
+(setq org-koma-letter-email nil)
+(setq org-koma-letter-use-foldmarks nil)
+#+END_SRC
+
 * Org Mode
 
 #+begin_src emacs-lisp
