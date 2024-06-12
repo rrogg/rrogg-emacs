@@ -4,8 +4,8 @@
 
 ** Maximize Frame
 
-The Emacs frame is maximized at all times to make use of every pixel on the
-screen.
+The Emacs frame is maximized at all times to make use of every pixel
+on the screen.
 
 #+begin_src emacs-lisp :tangle "early-init.el"
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
@@ -14,13 +14,14 @@ screen.
 
 ** Hide Welcome Screen and Empty =*scratch*=
 
-Emacs shows a splash screen at startup from which one can easily get to the
-tutorial. While helpful in the beginning, this screen gets abdicable with
-time. Therefore it's disabled.
-Emacs also automatically loads a buffer called =*scratch*=, which serves as a
-place to try out emacs lisp code or to type out some ideas. This is very helpful
-as one doesn't have to think about creating a new file for every unrelated
-thought. The welcome message isn't needed, so it's disabled.
+Emacs shows a splash screen at startup from which one can easily get
+to the tutorial. While helpful in the beginning, this screen gets
+abdicable with time. Therefore it's disabled.
+Emacs also automatically loads a buffer called =*scratch*=, which
+serves as a place to try out emacs lisp code or to type out some
+ideas. This is very helpful as one doesn't have to think about
+creating a new file for every unrelated thought. The welcome message
+isn't needed, so it's disabled.
 
 #+begin_src emacs-lisp :tangle "early-init.el"
 (setq inhibit-startup-screen t
@@ -39,9 +40,9 @@ Display no GUI components other than the =modline=.
 
 ** Initialise the Package Cache
 
-Initialise installed packages and make them available when Emacs starts.
-This must be set in the =early-init.el= in order to make the packages available
-before reading the =init.el=. 
+Initialise installed packages and make them available when Emacs
+starts. This must be set in the =early-init.el= in order to make the
+packages available before reading the =init.el=. 
 
 #+begin_src emacs-lisp :tangle "early-init.el"
 (setq package-enable-at-startup t)
@@ -51,12 +52,35 @@ before reading the =init.el=.
 
 ** Backups and Lockfiles
 
-Emacs creates backups of files automatically by default. I like to decide what
-gets backuped where on my own.
-Files don't need to be locked to prevent external programs from editing these,
-because I should be aware of it and actually want this to happen.
+Emacs creates backups of files automatically by default. I like to
+decide what gets backuped where on my own.
+Files don't need to be locked to prevent external programs from
+editing these, because I should be aware of it and actually want this
+to happen.
 
 #+begin_src emacs-lisp :tangle "init.el"
 (setq make-backup-files nil)
 (setq create-lockfiles nil)
+#+end_src
+
+** Text Manipulation and Language
+
+*** The =TAB= Key: Indentation and Completion
+
+The =TAB= key tries to indent the current line or paragraph. If the
+text can't be indented, it will try to do a completion at
+point. ~tab-always-indent~ is set to accomplish this.
+Exceptions for completing are controlled by ~tab-first-completion~.
+A =TAB= shall always be a number of spaces, defined by ~tab-width~,
+and never an actual tab.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package emacs
+  :ensure nil
+  :demand t
+  :config
+  (setq tab-always-indent 'complete)
+  (setq tab-first-completion 'word-or-paren-or-punct)
+  (setq-default tab-width 4
+                indent-tabs-mode nil))
 #+end_src
