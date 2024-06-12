@@ -84,3 +84,28 @@ and never an actual tab.
   (setq-default tab-width 4
                 indent-tabs-mode nil))
 #+end_src
+
+*** Wrap Lines at a Reasonable Width
+
+Long lines of text are wrapped at a width of 70 characters to improve
+readability. In order to leave long code lines untouched, automatic
+line wrap is only active in =text-mode= and modes which inherit from
+it, like =org-mode=.
+Emacs default is that a sentence ends with a double space. One space
+after the end of a sentence, which is marked by a period, feels more
+natural for me.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package text-mode
+  :ensure nil
+  :mode "\\`\\(README\\|CHANGELOG\\|COPYING\\|LICENSE\\)\\'"
+  :hook
+  (text-mode . turn-on-auto-fill)
+  :config
+  (setq-default fill-column 70 )
+  (setq sentence-end-double-space nil)
+  (setq sentence-end-without-period nil)
+  (setq colon-double-space nil)
+  (setq use-hard-newlines nil)
+  (setq adaptive-fill-mode t))
+#+end_src
