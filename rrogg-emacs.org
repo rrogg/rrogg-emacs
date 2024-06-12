@@ -109,3 +109,79 @@ natural for me.
   (setq use-hard-newlines nil)
   (setq adaptive-fill-mode t))
 #+end_src
+
+** git
+
+*** How to Write a Good Commit Message
+
+A good commit message follows [[https://chris.beams.io/posts/git-commit/][7 rules]]:
+
+1. Separate subject from body with a blank line
+2. Limit the subject line to 50 characters
+3. Capitalize the subject line
+4. Do not end the subject line with a period
+5. Use the imperative mood in the subject line
+6. Wrap the body at 72 characters
+7. Use the body to explain what and why vs. how
+
+For example:
+
+#+begin_example
+Summarize changes in around 50 characters or less
+
+More detailed explanatory text, if necessary. Wrap it to about 72
+characters or so. In some contexts, the first line is treated as the
+subject of the commit and the rest of the text as the body. The
+blank line separating the summary from the body is critical (unless
+you omit the body entirely); various tools like `log`, `shortlog`
+and `rebase` can get confused if you run the two together.
+
+Explain the problem that this commit is solving. Focus on why you
+are making this change as opposed to how (the code explains that).
+Are there side effects or other unintuitive consequences of this
+change? Here's the place to explain them.
+
+Further paragraphs come after blank lines.
+
+ - Bullet points are okay, too
+
+ - Typically a hyphen or asterisk is used for the bullet, preceded
+   by a single space, with blank lines in between, but conventions
+   vary here
+
+If you use an issue tracker, put references to them at the bottom,
+like this:
+
+Resolves: #123
+See also: #456, #789
+#+end_example
+
+*** magit
+
+=magit= is a superb interface to =git=.
+
+All stylistic rules can be taken care of by =magit=.
+It will color characters on the summary line exceeding length of 50 red and does
+the same for the second line, which should be blank.
+The body of the message is wrapped at length 70.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package magit
+  :ensure t
+  :bind ("C-c g" . magit-status)
+  :init
+  (setq magit-define-global-key-bindings nil)
+  :config
+  (setq git-commit-summary-max-length 50)
+  (setq git-commit-style-convention-checks '(non-empty-second-line))
+  (setq git-commit-fill-column 70)
+  (defun rrogg-git-commit-setup()
+    (insert "#1. Capitalize the subject line
+#2. Do not end the subject line with a period
+#3. Use the present tense imperative mood in the subject line and body
+#4. Use the body to explain what and why vs. how
+#-----------------------------------------------
+#If applied, this commit will …
+"))
+  (add-hook 'git-commit-setup-hook #'rrogg-git-commit-setup))
+#+end_src
