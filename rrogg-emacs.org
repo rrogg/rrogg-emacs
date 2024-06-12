@@ -46,3 +46,17 @@ before reading the =init.el=.
 #+begin_src emacs-lisp :tangle "early-init.el"
 (setq package-enable-at-startup t)
 #+end_src
+
+* The Main Initialisation of Emacs (=init.el=)
+
+** Backups and Lockfiles
+
+Emacs creates backups of files automatically by default. I like to decide what
+gets backuped where on my own.
+Files don't need to be locked to prevent external programs from editing these,
+because I should be aware of it and actually want this to happen.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(setq make-backup-files nil)
+(setq create-lockfiles nil)
+#+end_src
