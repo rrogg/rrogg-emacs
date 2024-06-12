@@ -11,3 +11,13 @@ screen.
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+end_src
+
+** Disable GUI Bar Components
+
+Display no GUI components other than the =modline=.
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+#+end_src
