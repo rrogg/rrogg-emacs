@@ -1,0 +1,13 @@
+#+title: rrogg-emacs - My GNU Emacs Configuration
+
+* The Early Initialisation of Emacs (=early-init.el=)
+
+** Maximize Frame
+
+The Emacs frame is maximized at all times to make use of every pixel on the
+screen.
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+#+end_src
