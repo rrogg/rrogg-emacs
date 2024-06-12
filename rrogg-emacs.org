@@ -12,6 +12,21 @@ screen.
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+end_src
 
+** Hide Welcome Screen and Empty =*scratch*=
+
+Emacs shows a splash screen at startup from which one can easily get to the
+tutorial. While helpful in the beginning, this screen gets abdicable with
+time. Therefore it's disabled.
+Emacs also automatically loads a buffer called =*scratch*=, which serves as a
+place to try out emacs lisp code or to type out some ideas. This is very helpful
+as one doesn't have to think about creating a new file for every unrelated
+thought. The welcome message isn't needed, so it's disabled.
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+(setq inhibit-startup-screen t
+      initial-scratch-message nil)
+#+end_src
+
 ** Disable GUI Bar Components
 
 Display no GUI components other than the =modline=.
