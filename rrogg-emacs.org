@@ -36,3 +36,13 @@ Display no GUI components other than the =modline=.
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 #+end_src
+
+** Initialise the Package Cache
+
+Initialise installed packages and make them available when Emacs starts.
+This must be set in the =early-init.el= in order to make the packages available
+before reading the =init.el=. 
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+(setq package-enable-at-startup t)
+#+end_src
