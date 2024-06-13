@@ -26,6 +26,7 @@
 (use-package magit
   :ensure t
   :bind ("C-c g" . magit-status)
+  :hook (git-commit-setup . rrogg-git-commit-setup)
   :init
   (setq magit-define-global-key-bindings nil)
   :config
@@ -39,5 +40,4 @@
 #4. Use the body to explain what and why vs. how
 #-----------------------------------------------
 #If applied, this commit will …
-"))
-  (add-hook 'git-commit-setup-hook #'rrogg-git-commit-setup))
+")))
