@@ -48,6 +48,35 @@ packages available before reading the =init.el=.
 (setq package-enable-at-startup t)
 #+end_src
 
+** Avoid the Initial Flash of Light
+
+The default Emacs theme that is loaded initially is white.
+This causes a "flash of light" if a dark theme is selected by the
+user, as the basic colour values at startup are still loaded first.
+The funtions below will hardcode the background colour to black and
+then load the theme the user wants.
+This function is from the config of [[https://protesilaos.com][Protesilaos Stavrou]].
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+(defun prot-emacs-re-enable-frame-theme (_frame)
+  "Re-enable active theme, if any, upon FRAME creation.
+Add this to `after-make-frame-functions' so that new frames do
+not retain the generic background set by the function
+`prot-emacs-avoid-initial-flash-of-light'."
+  (when-let ((theme (car custom-enabled-themes)))
+    (enable-theme theme)))
+
+(defun prot-emacs-avoid-initial-flash-of-light ()
+  "Avoid flash of light when starting Emacs, if needed.
+New frames are instructed to call `prot-emacs-re-enable-frame-theme'."
+  (setq mode-line-format nil)
+  (set-face-attribute 'default nil :background "#000000" :foreground "#ffffff")
+  (set-face-attribute 'mode-line nil :background "#000000" :foreground "#ffffff" :box 'unspecified)
+  (add-hook 'after-make-frame-functions #'prot-emacs-re-enable-frame-theme))
+
+(prot-emacs-avoid-initial-flash-of-light)
+#+end_src
+
 * The Main Initialisation of Emacs (=init.el=)
 
 ** Backups and Lockfiles
