@@ -51,3 +51,12 @@
   (setq history-delete-duplicates t)
   (setq savehist-save-minibuffer-history t)
   (add-to-list 'savehist-additional-variables 'kill-ring))
+
+(use-package modus-themes
+  :ensure t
+  :demand t
+  :bind (("<f5>" . modus-themes-toggle)
+         ("C-<f5>" . modus-themes-select))
+  :config
+  (setq modus-themes-to-toggle '(modus-operandi modus-vivendi))
+  (modus-themes-load-theme (cadr modus-themes-to-toggle)))

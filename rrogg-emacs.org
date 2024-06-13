@@ -203,3 +203,36 @@ package =savehist= implements a session independent history.
   (setq savehist-save-minibuffer-history t)
   (add-to-list 'savehist-additional-variables 'kill-ring))
 #+end_src
+
+** Themes
+
+The look of Emacs is defined in a theme. Custom themes usually alter
+e.g. the colors used to highlight headings or code. Readability and
+accessibility has highest priority. This may be to the expense of
+having a "stylish" looking Emacs, but that's OK.
+
+I found out about the =Modus= themes created by [[https://protesilaos.com][Protesilaos Stavrou]]
+while watching one of his videos about Emacs. Those themes are conform
+with the highest accessibility standard for color contrast between
+background and foreground values (WCAG AAA).
+
+The themes are shipped with Emacs since version =28.1=. The latest
+version is also available from ELPA. The ELPA version is the one I
+use.
+
+=Modus Operandi= is the light variant.
+=Modus Vivendi= is the dark variant.
+
+The themes come with a lot of options for customization. If those are
+used, they need to be set prior to the loading of the theme.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package modus-themes
+  :ensure t
+  :demand t
+  :bind (("<f5>" . modus-themes-toggle)
+         ("C-<f5>" . modus-themes-select))
+  :config
+  (setq modus-themes-to-toggle '(modus-operandi modus-vivendi))
+  (modus-themes-load-theme (cadr modus-themes-to-toggle)))
+#+end_src
