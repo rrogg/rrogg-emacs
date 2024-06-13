@@ -160,10 +160,10 @@ See also: #456, #789
 
 =magit= is a superb interface to =git=.
 
-All stylistic rules can be taken care of by =magit=.
-It will color characters on the summary line exceeding length of 50 red and does
-the same for the second line, which should be blank.
-The body of the message is wrapped at length 70.
+All stylistic rules can be taken care of by =magit=. It will color
+characters on the summary line exceeding length of 50 red and does the
+same for the second line, which should be blank. The body of the
+message is wrapped at length 70.
 
 #+begin_src emacs-lisp :tangle "init.el"
 (use-package magit
@@ -186,3 +186,20 @@ The body of the message is wrapped at length 70.
 ")))
 #+end_src
 
+** Save Commands Across Sessions
+
+Emacs doesn't have a persistent command history by default. The
+build-in history gets resetted with every new Emacs session. The
+package =savehist= implements a session independent history.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package savehist
+  :ensure nil
+  :hook (after-init . savehist-mode)
+  :config
+  (setq savehist-file (locate-user-emacs-file "savehist"))
+  (setq history-length 100)
+  (setq history-delete-duplicates t)
+  (setq savehist-save-minibuffer-history t)
+  (add-to-list 'savehist-additional-variables 'kill-ring))
+#+end_src
