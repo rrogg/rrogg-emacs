@@ -60,3 +60,9 @@
   :config
   (setq modus-themes-to-toggle '(modus-operandi modus-vivendi))
   (modus-themes-load-theme (cadr modus-themes-to-toggle)))
+
+(use-package autorevert
+  :ensure nil
+  :hook (after-init . global-auto-revert-mode)
+  :config
+  (setq auto-revert-verbose t))

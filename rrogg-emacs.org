@@ -1,4 +1,5 @@
 #+title: rrogg-emacs - My GNU Emacs Configuration
+#+startup: content indent
 
 * The Early Initialisation of Emacs (=early-init.el=)
 
@@ -264,4 +265,17 @@ used, they need to be set prior to the loading of the theme.
   :config
   (setq modus-themes-to-toggle '(modus-operandi modus-vivendi))
   (modus-themes-load-theme (cadr modus-themes-to-toggle)))
+#+end_src
+
+** Auto Revert Buffers
+
+Ensures that external changes to a file are updated in the buffer
+holding the content of that file.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package autorevert
+  :ensure nil
+  :hook (after-init . global-auto-revert-mode)
+  :config
+  (setq auto-revert-verbose t))
 #+end_src
