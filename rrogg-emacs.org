@@ -463,3 +463,22 @@ regions of the world.
   (setq world-clock-timer-second 60))
 #+end_src
 
+** Laptop-specific Settings
+
+My main computer is a laptop. It makes sense to keep an eye an
+remaining battery while not being connected to power. Battery status
+is shown in the mode line.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(unless (directory-empty-p "/sys/class/power_supply/")
+ (use-package battery
+   :ensure nil
+   :hook (after-init . display-battery-mode)
+   :config
+   (setq battery-mode-line-format
+         (cond
+          ((eq battery-status-function #'battery-linux-proc-acpi)
+           "⏻%b%p%%,%d°C ")
+           (battery-status-function
+            "⏻%b%p%% ")))))
+#+end_src

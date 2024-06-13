@@ -143,3 +143,15 @@
   (setq world-clock-buffer-name "*world-clock*")
   (setq world-clock-timer-enable t)
   (setq world-clock-timer-second 60))
+
+(unless (directory-empty-p "/sys/class/power_supply/")
+ (use-package battery
+   :ensure nil
+   :hook (after-init . display-battery-mode)
+   :config
+   (setq battery-mode-line-format
+         (cond
+          ((eq battery-status-function #'battery-linux-proc-acpi)
+           "⏻%b%p%%,%d°C ")
+           (battery-status-function
+            "⏻%b%p%% ")))))
