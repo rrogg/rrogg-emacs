@@ -353,6 +353,17 @@ used, they need to be set prior to the loading of the theme.
   (modus-themes-load-theme (cadr modus-themes-to-toggle)))
 #+end_src
 
+** Icons
+
+=nerd-icons.el= loads icons that can be used in various parts of the
+interface. This package doesn't install any font files automatically.
+The user must handle this step by invoking the command
+~nerd-icons-install-fonts~.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package nerd-icons
+  :ensure t)
+#+end_src
 ** Auto Revert Buffers
 
 Ensures that external changes to a file are updated in the buffer

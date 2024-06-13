@@ -73,6 +73,9 @@
   (setq modus-themes-to-toggle '(modus-operandi modus-vivendi))
   (modus-themes-load-theme (cadr modus-themes-to-toggle)))
 
+(use-package nerd-icons
+  :ensure t)
+
 (use-package autorevert
   :ensure nil
   :hook (after-init . global-auto-revert-mode)
