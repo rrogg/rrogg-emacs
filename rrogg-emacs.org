@@ -291,3 +291,30 @@ selection by default.
   :ensure nil
   :hook (after-init . delete-selection-mode))
 #+end_src
+
+** Display Date and Time
+
+With ~display-time-mode~ enabled, the mode line contains the current
+date and time. This is the only information needed from this function.
+All other options are disabled.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package time
+  :ensure nil
+  :hook (after-init . display-time-mode)
+  :config
+  (setq display-time-format " %a %e %b, %H:%M %Z ")
+  (setq display-time-interval 60)
+  (setq display-time-default-load-average nil)
+  (setq display-time-mail-directory nil)
+  (setq display-time-mail-function nil)
+  (setq display-time-use-mail-icon nil)
+  (setq display-time-mail-string nil)
+  (setq display-time-mail-face nil)
+  (setq display-time-string-forms
+        '((propertize
+           (format-time-string display-time-format now)
+           'face 'display-time-date-and-time
+           'help-echo (format-time-string "%a %b %e, %Y" now))
+          " ")))
+#+end_src
