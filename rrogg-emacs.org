@@ -279,3 +279,15 @@ holding the content of that file.
   :config
   (setq auto-revert-verbose t))
 #+end_src
+
+** Delete Selected Text Upon Insertion of New Text
+
+The sane way of working with text is to delete a selected text on
+insertion of new text. Emacs appends the inserted text to the
+selection by default.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package delsel
+  :ensure nil
+  :hook (after-init . delete-selection-mode))
+#+end_src

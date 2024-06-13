@@ -66,3 +66,7 @@
   :hook (after-init . global-auto-revert-mode)
   :config
   (setq auto-revert-verbose t))
+
+(use-package delsel
+  :ensure nil
+  :hook (after-init . delete-selection-mode))
