@@ -140,6 +140,92 @@ natural for me.
   (setq adaptive-fill-mode t))
 #+end_src
 
+** Providing and Managing Packages
+*** =package.el=
+
+Most extensions to Emacs can be loaded from archives, which are
+accessible via Emacs' very own package manager =package.el=. To use
+this feature, =package.el= needs to know, which archives it should
+use.
+Out of the box, Emacs includes the =GNU ELPA= archive. It contains
+packages conform with the terms of the Free Software Foundation.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(setq package-archives
+      '(("gnu-elpa" . "https://elpa.gnu.org/packages/")
+        ("gnu-elpa-devel" . "https://elpa.gnu.org/devel/")
+        ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+        ("melpa" . "https://melpa.org/packages/")))
+
+;; Highest number gets priority (what is not mentioned has priority 0)
+(setq package-archive-priorities
+      '(("gnu-elpa" . 3)
+        ("melpa" . 2)
+        ("nongnu" . 1)))
+#+end_src
+
+The command =M-x list-packages= brings up the package menu buffer,
+which lists all packages available from the archives defined above.
+The command retrieves the list of packages from the archive servers,
+if it has a connection to the internet. Else it uses the most recently
+retrieved list.
+
+Here are some of the frequently used commands in the package menu
+buffer:
+
+| Key     | Command                      | Description                                                                                                                                                |
+|---------+------------------------------+------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| h       | (package-menu-quick-help)    | Summary of commands in the package menu buffer                                                                                                             |
+| r       | (package-menu-refresh)       | Refresh package list                                                                                                                                       |
+| i       | (package-menu-mark-install)  | Mark the package on the current line for installation (adds an ‘I’ character to the start of the line)                                                     |
+| d       | (package-menu-mark-delete)   | Mark the package on the current line for deletion (adds a ‘D’ character to the start of the line                                                           |
+| u <RET> |                              | Remove any installation or deletion mark previously added to the current line                                                                              |
+| U       | (package-menu-mark-upgrades) | Mark all package with a newer available version for upgrading.  This places an ‘I’ on the new available versions, and a ‘D’ on the old installed versions. |
+| x       | (package-menu-execute)       | Download and install all packages marked with ‘I’, and their dependencies; also, delete all packages marked with ‘D’                                       |
+
+The command =(package-install PKG)= can be used to install package
+"PKG" manually from a code block.
+
+*** =use-package=
+
+Most Emacs configurations out there tend to be quite extensive. I
+expect nothing else for mine. Over time, it will grow and become
+cluttered. Loading time will most likely go up linked to the size of
+packages used.
+Having more control over when things get loaded or when certain code
+is executed is very welcome.
+The macro =use-package= provides this control. It isolates packages
+configuration in an Emacs config so that code belonging to a certain
+package only is executed when the package is loaded. When a package is
+loaded it is also configurable. This has the potential to squeeze some
+performance out of this config and to make it clean, tidy and
+organized.
+
+=use-package= provides several keywords to load and configure a
+package. See a basic example below.
+
+#+begin_example emacs-lisp
+(use-package foo
+  :ensure t
+  :init
+  (setq foo-variable t)
+  :config
+  (foo-mode 1))
+#+end_example
+
+The macro starts with =use-package foo=, which will load the package
+=foo=, but only, if it's already available on the system (else, a
+warning gets logged).
+
+=:ensure t= makes sure, that the package is installed and will
+download it from the package archives, if it's not present on the
+system. This is how packages are fetched and installed in Cortex.
+
+The =:init= keyword executes code before a package is loaded. It
+accepts one or more forms, up to the next keyword.
+
+Similarly, =:config= can be used to execute code after a package is
+loaded.
 ** git
 
 *** How to Write a Good Commit Message
@@ -365,3 +451,4 @@ regions of the world.
   (setq world-clock-timer-enable t)
   (setq world-clock-timer-second 60))
 #+end_src
+
