@@ -364,6 +364,7 @@ The user must handle this step by invoking the command
 (use-package nerd-icons
   :ensure t)
 #+end_src
+
 ** Auto Revert Buffers
 
 Ensures that external changes to a file are updated in the buffer
@@ -471,14 +472,35 @@ is shown in the mode line.
 
 #+begin_src emacs-lisp :tangle "init.el"
 (unless (directory-empty-p "/sys/class/power_supply/")
- (use-package battery
-   :ensure nil
-   :hook (after-init . display-battery-mode)
-   :config
-   (setq battery-mode-line-format
-         (cond
-          ((eq battery-status-function #'battery-linux-proc-acpi)
-           "⏻%b%p%%,%d°C ")
+  (use-package battery
+    :ensure nil
+    :hook (after-init . display-battery-mode)
+    :config
+    (setq battery-mode-line-format
+          (cond
+           ((eq battery-status-function #'battery-linux-proc-acpi)
+            "⏻%b%p%%,%d°C ")
            (battery-status-function
             "⏻%b%p%% ")))))
+#+end_src
+
+** Org Code Block Settings
+
+Source blocks can be edited in a window that uses the mode for the
+programming language of the block. This window will be spawned on top
+of the current window leaving the window configuration intact. The
+source code will be fontified and indented in the code block as
+expected for the language of the code.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org
+  :ensure nil
+  :config
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-src-window-setup 'current-window)
+  (setq org-edit-src-persistent-message nil)
+  (setq org-src-fontify-natively t)
+  (setq org-src-preserve-indentation t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-edit-src-content-indentation 0))
 #+end_src

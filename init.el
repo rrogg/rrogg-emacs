@@ -145,13 +145,24 @@
   (setq world-clock-timer-second 60))
 
 (unless (directory-empty-p "/sys/class/power_supply/")
- (use-package battery
-   :ensure nil
-   :hook (after-init . display-battery-mode)
-   :config
-   (setq battery-mode-line-format
-         (cond
-          ((eq battery-status-function #'battery-linux-proc-acpi)
-           "⏻%b%p%%,%d°C ")
+  (use-package battery
+    :ensure nil
+    :hook (after-init . display-battery-mode)
+    :config
+    (setq battery-mode-line-format
+          (cond
+           ((eq battery-status-function #'battery-linux-proc-acpi)
+            "⏻%b%p%%,%d°C ")
            (battery-status-function
             "⏻%b%p%% ")))))
+
+(use-package org
+  :ensure nil
+  :config
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-src-window-setup 'current-window)
+  (setq org-edit-src-persistent-message nil)
+  (setq org-src-fontify-natively t)
+  (setq org-src-preserve-indentation t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-edit-src-content-indentation 0))
