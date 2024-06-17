@@ -165,4 +165,11 @@
   (setq org-src-fontify-natively t)
   (setq org-src-preserve-indentation t)
   (setq org-src-tab-acts-natively t)
-  (setq org-edit-src-content-indentation 0))
+  (setq org-edit-src-content-indentation 0)
+  (setq org-structure-template-alist
+        '(("s" . "src")
+          ("e" . "src emacs-lisp")
+          ("t" . "src emacs-lisp :tangle FILENAME")
+          ("x" . "example")
+          ("X" . "export")
+          ("q" . "quote"))))

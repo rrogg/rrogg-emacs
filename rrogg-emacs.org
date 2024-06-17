@@ -491,6 +491,9 @@ programming language of the block. This window will be spawned on top
 of the current window leaving the window configuration intact. The
 source code will be fontified and indented in the code block as
 expected for the language of the code.
+Source code block templates are defined in
+~org-structure-template-alist~ and can be inserted via the function
+~org-insert-structure-template~ (=C-c C-,=).
 
 #+begin_src emacs-lisp :tangle "init.el"
 (use-package org
@@ -502,5 +505,12 @@ expected for the language of the code.
   (setq org-src-fontify-natively t)
   (setq org-src-preserve-indentation t)
   (setq org-src-tab-acts-natively t)
-  (setq org-edit-src-content-indentation 0))
+  (setq org-edit-src-content-indentation 0)
+  (setq org-structure-template-alist
+        '(("s" . "src")
+          ("e" . "src emacs-lisp")
+          ("t" . "src emacs-lisp :tangle FILENAME")
+          ("x" . "example")
+          ("X" . "export")
+          ("q" . "quote"))))
 #+end_src
