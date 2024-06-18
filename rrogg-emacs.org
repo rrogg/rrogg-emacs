@@ -577,3 +577,19 @@ Source code block templates are defined in
           ("X" . "export")
           ("q" . "quote"))))
 #+end_src
+
+** Vertical minibuffer layout - ~vertico~
+
+The default minibuffer layout displays completion candidates in a 2d
+grid. I prefer only one dimension. ~vertico~ enables a vertical layout.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package vertico
+  :ensure t
+  :hook (after-init . vertico-mode)
+  :config
+  (setq vertico-scroll-margin 0)
+  (setq vertico-count 5)
+  (setq vertico-resize t)
+  (setq vertico-cycle t))
+#+end_src

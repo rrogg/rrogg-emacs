@@ -220,3 +220,12 @@
           ("x" . "example")
           ("X" . "export")
           ("q" . "quote"))))
+
+(use-package vertico
+  :ensure t
+  :hook (after-init . vertico-mode)
+  :config
+  (setq vertico-scroll-margin 0)
+  (setq vertico-count 5)
+  (setq vertico-resize t)
+  (setq vertico-cycle t))
