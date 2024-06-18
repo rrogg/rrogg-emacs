@@ -71,7 +71,54 @@
          ("C-<f5>" . modus-themes-select))
   :config
   (setq modus-themes-to-toggle '(modus-operandi modus-vivendi))
+  (setq modus-themes-mixed-fonts t)
   (modus-themes-load-theme (cadr modus-themes-to-toggle)))
+
+(use-package fontaine
+  :ensure t
+  :if (display-graphic-p)
+  :hook
+  ((after-init . fontaine-mode)
+   (after-init . (lambda ()
+                   (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))))
+  :bind ("C-c f" . fontaine-set-preset)
+  :config
+  (setq fontaine-presets
+        '((small
+           :default-family "Hack"
+           :default-height 100
+           :variable-pitch-family "Hack")
+          (regular)
+          (medium
+           :default-weight semilight
+           :default-height 130
+           :bold-weight extrabold)
+          (large
+           :inherit medium
+           :default-height 150)
+          (t
+           :default-family "Hack"
+           :default-weight regular
+           :default-slant normal
+           :default-height 120
+
+           :fixed-pitch-family "Hack"
+           :fixed-pitch-weight nil
+           :fixed-pitch-slant nil
+           :fixed-pitch-height 1.0
+
+           :variable-pitch-family "Inter"
+           :variable-pitch-weight nil
+           :variable-pitch-slant nil
+           :variable-pitch-height 1.0))))
+
+(use-package face-remap
+  :ensure nil
+  :hook (text-mode . variable-pitch-mode)
+  :bind
+  (("C-x C-=" . global-text-scale-adjust)
+   ("C-x C-+" . global-text-scale-adjust)
+   ("C-x C-0" . global-text-scale-adjust)))
 
 (use-package nerd-icons
   :ensure t)

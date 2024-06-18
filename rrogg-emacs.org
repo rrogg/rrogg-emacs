@@ -350,7 +350,70 @@ used, they need to be set prior to the loading of the theme.
          ("C-<f5>" . modus-themes-select))
   :config
   (setq modus-themes-to-toggle '(modus-operandi modus-vivendi))
+  (setq modus-themes-mixed-fonts t)
   (modus-themes-load-theme (cadr modus-themes-to-toggle)))
+#+end_src
+
+** Fonts
+
+The font configuration is handled by the ~fontaine~ package. Various
+presets are defined in ~fontaine-presets~ and can be loaded with
+~fontaine-set-preset~ (=C-c f=).
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package fontaine
+  :ensure t
+  :if (display-graphic-p)
+  :hook
+  ((after-init . fontaine-mode)
+   (after-init . (lambda ()
+                   (fontaine-set-preset (or (fontaine-restore-latest-preset) 'regular)))))
+  :bind ("C-c f" . fontaine-set-preset)
+  :config
+  (setq fontaine-presets
+        '((small
+           :default-family "Hack"
+           :default-height 100
+           :variable-pitch-family "Hack")
+          (regular)
+          (medium
+           :default-weight semilight
+           :default-height 130
+           :bold-weight extrabold)
+          (large
+           :inherit medium
+           :default-height 150)
+          (t
+           :default-family "Hack"
+           :default-weight regular
+           :default-slant normal
+           :default-height 120
+
+           :fixed-pitch-family "Hack"
+           :fixed-pitch-weight nil
+           :fixed-pitch-slant nil
+           :fixed-pitch-height 1.0
+
+           :variable-pitch-family "Inter"
+           :variable-pitch-weight nil
+           :variable-pitch-slant nil
+           :variable-pitch-height 1.0))))
+#+end_src
+
+~variable-pitch-mode~ makes the current buffer use a proportionately
+spaced font. All buffers that load with ~text-mode~ will use these for
+prose. Code e.g. Org source code blocks still use a monospaced font.
+The font size can be adjusted on the fly with
+~global-text-scale-adjust~ for all buffers.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package face-remap
+  :ensure nil
+  :hook (text-mode . variable-pitch-mode)
+  :bind
+  (("C-x C-=" . global-text-scale-adjust)
+   ("C-x C-+" . global-text-scale-adjust)
+   ("C-x C-0" . global-text-scale-adjust)))
 #+end_src
 
 ** Icons
