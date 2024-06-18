@@ -578,7 +578,7 @@ Source code block templates are defined in
           ("q" . "quote"))))
 #+end_src
 
-** Vertical minibuffer layout - ~vertico~
+** Vertical Minibuffer Layout - ~vertico~
 
 The default minibuffer layout displays completion candidates in a 2d
 grid. I prefer only one dimension. ~vertico~ enables a vertical layout.
@@ -592,4 +592,22 @@ grid. I prefer only one dimension. ~vertico~ enables a vertical layout.
   (setq vertico-count 5)
   (setq vertico-resize t)
   (setq vertico-cycle t))
+#+end_src
+
+** Annotations for Completion Candidates - ~marginalia~
+
+Completion candidates in the minibuffer are displayed vertically in my
+configuration. This leaves a lot of space to the right of them, which
+is wasted.
+~marginalia~ fills this space with context for the candidates. This is
+very helpful when selecting functions and files or describing
+variables.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package marginalia
+  :ensure t
+  :defer 1
+  :config
+  (setq marginalia-max-relative-age 0)
+  (marginalia-mode 1))
 #+end_src

@@ -229,3 +229,10 @@
   (setq vertico-count 5)
   (setq vertico-resize t)
   (setq vertico-cycle t))
+
+(use-package marginalia
+  :ensure t
+  :defer 1
+  :config
+  (setq marginalia-max-relative-age 0)
+  (marginalia-mode 1))
