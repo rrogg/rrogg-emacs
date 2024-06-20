@@ -356,9 +356,20 @@ used, they need to be set prior to the loading of the theme.
 
 ** Fonts
 
+Typefaces (e.g. Inter) and fonts (e.g. Inter Extra Light 12) can be
+defined by =set-face-attribute=. There are three faces: =default=,
+=fixed-pitch= (monospaced) and =variable-pitch= (proportionally
+spaced). =fixed-pitch= is used in programming modes. Sometimes reading
+prose or non-code texts is easier when displayed in a
+=variable-pitch=.
+
 The font configuration is handled by the ~fontaine~ package. Various
 presets are defined in ~fontaine-presets~ and can be loaded with
 ~fontaine-set-preset~ (=C-c f=).
+
+For now, I'll start with my font choices from earlier configurations.
+Those are =Hack= as monospaced font and =Inter= as proportionally
+spaced font.
 
 #+begin_src emacs-lisp :tangle "init.el"
 (use-package fontaine
