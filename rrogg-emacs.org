@@ -622,3 +622,284 @@ variables.
   (setq marginalia-max-relative-age 0)
   (marginalia-mode 1))
 #+end_src
+
+** Mode Line
+
+I consider the default mode line to be a bit cryptic and cluttered
+with information that I do not need all the time, e.g. displaying a
+lot of modes that are active in the buffer.
+The mode line configured by [[https://protesilaos.com][Protesilaos Stavrou]] looks very minimal yet
+informational, which I like.
+I replicate most of his settings below.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package emacs
+  :ensure nil
+  :config
+  (setq mode-line-compact nil)
+  (setq mode-line-right-align-edge 'right-margin)
+  (setq-default mode-line-format
+                '("%e"
+                  prot-modeline-buffer-status
+                  prot-modeline-window-dedicated-status
+                  prot-modeline-input-method
+                  "  "
+                  rrogg-modeline-buffer-identification
+                  "  "
+                  rrogg-modeline-major-mode
+                  prot-modeline-process
+                  "  "
+                  prot-modeline-vc-branch
+                  "  "
+                  mode-line-format-right-align
+                  "  "
+                  prot-modeline-misc-info)))
+
+;;; Mode line faces
+
+(defgroup prot-modeline nil
+  "Custom modeline that is stylistically close to the default."
+  :group 'mode-line)
+
+(defgroup prot-modeline-faces nil
+  "Faces for my custom modeline."
+  :group 'prot-modeline)
+
+(defface prot-modeline-indicator-button nil
+  "Generic face used for indicators that have a background.
+Modify this face to, for example, add a :box attribute to all
+relevant indicators (combines nicely with my `spacious-padding'
+package).")
+
+(defface prot-modeline-indicator-red-bg
+  '((default :inherit (bold prot-modeline-indicator-button))
+    (((class color) (min-colors 88) (background light))
+     :background "#aa1111" :foreground "white")
+    (((class color) (min-colors 88) (background dark))
+     :background "#ff9090" :foreground "black")
+    (t :background "red" :foreground "black"))
+  "Face for modeline indicators with a background."
+  :group 'prot-modeline-faces)
+
+(defface prot-modeline-indicator-gray-bg
+  '((default :inherit (bold prot-modeline-indicator-button))
+    (((class color) (min-colors 88) (background light))
+     :background "#808080" :foreground "white")
+    (((class color) (min-colors 88) (background dark))
+     :background "#a0a0a0" :foreground "black")
+    (t :inverse-video t))
+  "Face for modeline indicatovrs with a background."
+  :group 'prot-modeline-faces)
+
+(defface prot-modeline-indicator-green-bg
+  '((default :inherit (bold prot-modeline-indicator-button))
+    (((class color) (min-colors 88) (background light))
+     :background "#207b20" :foreground "white")
+    (((class color) (min-colors 88) (background dark))
+     :background "#77d077" :foreground "black")
+    (t :background "green" :foreground "black"))
+  "Face for modeline indicators with a background."
+  :group 'prot-modeline-faces)
+
+;;; Buffer status
+
+(defvar-local prot-modeline-buffer-status
+    '(:eval
+      (when (file-remote-p default-directory)
+        (propertize " @ "
+                    'face 'prot-modeline-indicator-red-bg
+                    'mouse-face 'mode-line-highlight)))
+  "Mode line construct for showing remote file name.")
+
+;;; Dedicated window
+
+(defvar-local prot-modeline-window-dedicated-status
+    '(:eval
+      (when (window-dedicated-p)
+        (propertize " = "
+                    'face 'prot-modeline-indicator-gray-bg
+                    'mouse-face 'mode-line-highlight)))
+  "Mode line construct for dedicated window indicator.")
+
+;;; Input method
+
+(defvar-local prot-modeline-input-method
+    '(:eval
+      (when current-input-method-title
+        (propertize (format " %s " current-input-method-title)
+                    'face 'prot-modeline-indicator-green-bg
+                    'mouse-face 'mode-line-highlight)))
+  "Mode line construct to report the multilingual environment.")
+
+;;; Buffer name
+
+(defun prot-modeline-buffer-identification-face ()
+  "Return appropriate face or face list for `prot-modeline-buffer-identification'."
+  (let ((file (buffer-file-name)))
+    (cond
+     ((and (mode-line-window-selected-p)
+           file
+           (buffer-modified-p))
+      '(italic mode-line-buffer-id))
+     ((and file
+           (buffer-modified-p))
+      'italic)
+     ((mode-line-window-selected-p)
+      'mode-line-buffer-id))))
+
+(defun rrogg-modeline-buffer-name ()
+  "Return buffer name, with read-only indicator if relevant."
+  (let ((name (buffer-name)))
+    (if buffer-read-only
+        (format "%s %s" (char-to-string #xE0A2) name)
+      name)))
+
+(defun prot-modeline-buffer-name-help-echo ()
+  "Return `help-echo' value for `rrogg-modeline-buffer-identification'."
+  (concat
+   (propertize (buffer-name) 'face 'mode-line-buffer-id)
+   "\n"
+   (propertize
+    (or (buffer-file-name)
+        (format "No underlying file.\nDirectory is: %s" default-directory))
+    'face 'font-lock-doc-face)))
+
+(defvar-local rrogg-modeline-buffer-identification
+    '(:eval
+      (propertize (rrogg-modeline-buffer-name)
+                  'face (prot-modeline-buffer-identification-face)
+                  'mouse-face 'mode-line-highlight
+                  'help-echo (prot-modeline-buffer-name-help-echo)))
+  "Mode line construct for identifying the buffer being displayed.
+Propertize the current buffer with the `mode-line-buffer-id'
+face.  Let other buffers have no face.")
+
+;;; Major mode
+
+(defun prot-modeline-major-mode-indicator ()
+  "Return appropriate propertized mode line indicator for the major mode."
+  (let ((indicator (cond
+                    ((derived-mode-p 'text-mode) "§")
+                    ((derived-mode-p 'prog-mode) "λ")
+                    ((derived-mode-p 'comint-mode) ">_")
+                    (t "◦"))))
+    (propertize indicator 'face 'shadow)))
+
+(defun prot-modeline-major-mode-name ()
+  "Return capitalized `major-mode' without the -mode suffix."
+  (capitalize (string-replace "-mode" "" (symbol-name major-mode))))
+
+(defun prot-modeline-major-mode-help-echo ()
+  "Return `help-echo' value for `prot-modeline-major-mode'."
+  (if-let ((parent (get major-mode 'derived-mode-parent)))
+      (format "Symbol: `%s'.  Derived from: `%s'" major-mode parent)
+    (format "Symbol: `%s'." major-mode)))
+
+(defvar-local rrogg-modeline-major-mode
+     '(:eval
+       (concat
+        (prot-modeline-major-mode-indicator)
+        " "
+        (propertize (prot-modeline-major-mode-name)
+         'mouse-face 'mode-line-highlight
+         'help-echo (prot-modeline-major-mode-help-echo))))
+  "Mode line construct for displaying major modes.")
+
+;;; Processes
+
+(defvar-local prot-modeline-process
+    (list '("" mode-line-process))
+  "Mode line construct for the running process indicator.")
+
+
+;;; vc branch
+
+(declare-function vc-git--symbolic-ref "vc-git" (file))
+
+(defun prot-modeline--vc-branch-name (file backend)
+  "Return capitalized VC branch name for FILE with BACKEND."
+  (when-let ((rev (vc-working-revision file backend))
+             (branch (or (vc-git--symbolic-ref file)
+                         (substring rev 0 7))))
+    (capitalize branch)))
+
+(declare-function vc-git-working-revision "vc-git" (file))
+
+(defvar prot-modeline-vc-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [mode-line down-mouse-1] 'vc-diff)
+    (define-key map [mode-line down-mouse-3] 'vc-root-diff)
+    map)
+  "Keymap to display on VC indicator.")
+
+(defun prot-modeline--vc-help-echo (file)
+  "Return `help-echo' message for FILE tracked by VC."
+  (format "Revision: %s\nmouse-1: `vc-diff'\nmouse-3: `vc-root-diff'"
+          (vc-working-revision file)))
+
+(defun prot-modeline--vc-text (file branch &optional face)
+  "Prepare text for Git controlled FILE, given BRANCH.
+With optional FACE, use it to propertize the BRANCH."
+  (concat
+   (propertize (char-to-string #xE0A0) 'face 'shadow)
+   " "
+   (propertize branch
+               'face face
+               'mouse-face 'mode-line-highlight
+               'help-echo (prot-modeline--vc-help-echo file)
+               'local-map prot-modeline-vc-map)))
+
+(defun prot-modeline--vc-details (file branch &optional face)
+  "Return Git BRANCH details for FILE."
+  (prot-modeline--vc-text file branch face))
+
+(defvar prot-modeline--vc-faces
+  '((added . vc-locally-added-state)
+    (edited . vc-edited-state)
+    (removed . vc-removed-state)
+    (missing . vc-missing-state)
+    (conflict . vc-conflict-state)
+    (locked . vc-locked-state)
+    (up-to-date . vc-up-to-date-state))
+  "VC state faces.")
+
+(defun prot-modeline--vc-get-face (key)
+  "Get face from KEY in `prot-modeline--vc-faces'."
+   (alist-get key prot-modeline--vc-faces 'up-to-date))
+
+(defun prot-modeline--vc-face (file backend)
+  "Return VC state face for FILE with BACKEND."
+  (prot-modeline--vc-get-face (vc-state file backend)))
+
+(defvar-local prot-modeline-vc-branch
+    '(:eval
+      (when-let* (((mode-line-window-selected-p))
+                  (file (buffer-file-name))
+                  (backend (vc-backend file))
+                  (branch (prot-modeline--vc-branch-name file backend))
+                  (face (prot-modeline--vc-face file backend)))
+        (prot-modeline--vc-details file branch face)))
+  "Mode line construct to return propertized VC branch.")
+
+;;; Misc info
+
+(defvar-local prot-modeline-misc-info
+    '(:eval
+      (when (mode-line-window-selected-p)
+        mode-line-misc-info))
+  "Mode line construct displaying `mode-line-misc-info'.
+Specific to the current window's mode line.")
+
+
+;;; Enable risky variables
+
+(dolist (construct '(prot-modeline-buffer-status
+                     prot-modeline-window-dedicated-status
+                     prot-modeline-input-method
+                     rrogg-modeline-buffer-identification
+                     rrogg-modeline-major-mode
+                     prot-modeline-process
+                     prot-modeline-vc-branch
+                     prot-modeline-misc-info))
+  (put construct 'risky-local-variable t))
+#+end_src
