@@ -506,3 +506,10 @@ Specific to the current window's mode line.")
                      prot-modeline-vc-branch
                      prot-modeline-misc-info))
   (put construct 'risky-local-variable t))
+
+(use-package ediff
+  :ensure nil
+  :commands (ediff-buffers ediff-files ediff-buffers3 ediff-files3)
+  :init
+  (setq ediff-split-window-function 'split-window-horizontally)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain))

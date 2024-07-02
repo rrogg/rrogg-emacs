@@ -903,3 +903,18 @@ Specific to the current window's mode line.")
                      prot-modeline-misc-info))
   (put construct 'risky-local-variable t))
 #+end_src
+
+** Ediff
+
+Comparing files can be done effectively with ~ediff~. Put the buffers
+side-by-side instead of on top of eachother for better visibility of
+the diffs.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package ediff
+  :ensure nil
+  :commands (ediff-buffers ediff-files ediff-buffers3 ediff-files3)
+  :init
+  (setq ediff-split-window-function 'split-window-horizontally)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+#+end_src
