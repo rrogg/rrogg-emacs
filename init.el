@@ -513,3 +513,156 @@ Specific to the current window's mode line.")
   :init
   (setq ediff-split-window-function 'split-window-horizontally)
   (setq ediff-window-setup-function 'ediff-setup-windows-plain))
+
+(use-package calendar
+  :ensure nil
+  :commands (calendar)
+  :config
+  (setq calendar-mark-diary-entries-flag nil)
+  (setq calendar-mark-holidays-flag t)
+  (setq calendar-mode-line-format nil)
+  (setq calendar-time-display-form
+        '( 24-hours ":" minutes
+           (when time-zone (format "(%s)" time-zone))))
+  (setq calendar-week-start-day 1)      ; Monday
+  (setq calendar-date-style 'iso)
+  (setq calendar-time-zone-style 'numeric) ; Emacs 28.1
+
+  (require 'cal-dst)
+  (setq calendar-standard-time-zone-name "+0200")
+  (setq calendar-daylight-time-zone-name "+0100"))
+
+(use-package holidays
+  :ensure nil
+  :config
+  (setq calendar-holidays
+        '((holiday-fixed 1 1 "Neujahr")
+          (holiday-fixed 5 1 "Tag der Arbeit")
+          (holiday-fixed 10 3 "Tag der Deutschen Einheit")
+          (holiday-fixed 12 25 "1. Weihnachtstag")
+          (holiday-fixed 12 26 "2. Weihnachtstag")
+          (holiday-easter-etc  -2 "Karfreitag")
+          (holiday-easter-etc  +1 "Ostermontag")
+          (holiday-easter-etc +39 "Christi Himmelfahrt")
+          (holiday-easter-etc +50 "Pfingstmontag")
+          (holiday-easter-etc +60 "Fronleichnam")
+          (holiday-fixed 11 1 "Allerheiligen"))))
+
+(defun rrogg-org-calendar-specialdate ()
+  "List of special dates, for Diary display in Org mode."
+  (require 'holidays)
+  (let ((hl (rrogg-calendar-check-specialdates org-agenda-current-date)))
+    (and hl (mapconcat #'identity hl "; "))))
+
+(defun rrogg-calendar-check-specialdates (date)
+  "Check the list of special dates for any that occur on DATE.
+DATE is a list (month day year).  This function considers the
+special dates from the list `calendar-specialdates', and returns a list of
+strings describing those special dates that apply on DATE, or nil if none do."
+  (let ((displayed-month (calendar-extract-month date))
+        (displayed-year (calendar-extract-year date))
+        specialdate-list)
+    (dolist (h (rrogg-calendar-specialdate-list) specialdate-list)
+      (if (calendar-date-equal date (car h))
+          (setq specialdate-list (append specialdate-list (cdr h)))))))
+
+(defun rrogg-calendar-specialdate-list ()
+  "Form the list of special dates that occur on dates in the calendar window.
+The special dates are those in the list `calendar-specialdates'."
+  (let (res h err)
+    (sort
+     (dolist (p rrogg-calendar-specialdates res)
+       (if (setq h (if calendar-debug-sexp
+                       (let ((debug-on-error t))
+                         (eval p))
+                     (condition-case err
+                         (eval p)
+                       (error
+                        (display-warning
+                         'specialdays
+                         (format "Bad specialdate list item: %s\nError: %s\n"
+                                 p err)
+                         :error)
+                        nil))))
+           (setq res (append h res))))
+     'calendar-date-compare)))
+
+(setq rrogg-calendar-specialdates
+      '((holiday-float 5 0 2 "Muttertag")
+        (holiday-float 6 0 3 "Vatertag")
+        (holiday-float 12 0 -4 "1. Advent" 24)
+        (holiday-float 12 0 -3 "2. Advent" 24)
+        (holiday-float 12 0 -2 "3. Advent" 24)
+        (holiday-float 12 0 -1 "4. Advent" 24)
+        (holiday-fixed 12 24 "Heiligabend")
+        (holiday-fixed 1 6 "Heilige Drei Könige")
+        (holiday-easter-etc -52 "Weiberfastnacht")
+        (holiday-easter-etc -50 "Karnevalssamstag")
+        (holiday-easter-etc -49 "Karnevalssonntag")
+        (holiday-easter-etc -48 "Rosenmontag")
+        (holiday-easter-etc -47 "Veilchendienstag")
+        (holiday-easter-etc -46 "Aschermittwoch")
+        (holiday-easter-etc -3 "Gründonnerstag")
+        (holiday-easter-etc   0 "Ostersonntag")
+        (holiday-easter-etc +49 "Pfingstsonntag")
+        (holiday-fixed 8 15 "Mariae Himmelfahrt")
+        (holiday-fixed 11 11 "Martinstag")
+        (holiday-fixed 11 11 "Elfter im Elften")
+        (holiday-float 11 3 1 "Buss- und Bettag" 16)
+        (holiday-float 11 0 1 "Totensonntag" 20)))
+
+(use-package solar
+  :config
+  (setq calendar-latitude [51 26 north]) ; Not my actual coordinates
+  (setq calendar-longitude [6 45 east]))
+
+(defun rrogg-org-calendar-solar ()
+  "List of solar dates, for Diary display in Org mode."
+  (require 'holidays)
+  (let ((hl (rrogg-calendar-check-solar org-agenda-current-date)))
+    (and hl (mapconcat #'identity hl "; "))))
+
+(defun rrogg-calendar-check-solar (date)
+  "Check the list of solar for any that occur on DATE.
+DATE is a list (month day year).  This function considers the
+special dates from the list `calendar-solar', and returns a list of
+strings describing those solar that apply on DATE, or nil if none do."
+  (let ((displayed-month (calendar-extract-month date))
+        (displayed-year (calendar-extract-year date))
+        solar-list)
+    (dolist (h (rrogg-calendar-solar-list) solar-list)
+      (if (calendar-date-equal date (car h))
+          (setq solar-list (append solar-list (cdr h)))))))
+
+(defun rrogg-calendar-solar-list ()
+  "Form the list of solar that occur on dates in the calendar window.
+The solar are those in the list `calendar-solar'."
+  (let (res h err)
+    (sort
+     (dolist (p rrogg-calendar-solar res)
+       (if (setq h (if calendar-debug-sexp
+                       (let ((debug-on-error t))
+                         (eval p))
+                     (condition-case err
+                         (eval p)
+                       (error
+                        (display-warning
+                         'solar
+                         (format "Bad solar list item: %s\nError: %s\n"
+                                 p err)
+                         :error)
+                        nil))))
+           (setq res (append h res))))
+     'calendar-date-compare)))
+
+(setq rrogg-calendar-solar
+      '((holiday-sexp calendar-daylight-savings-starts
+	                  (format "Beginn der Sommerzeit – die Uhr wird um eine Stunde vorgestellt %s"
+		                      (solar-time-string
+			                   (/ calendar-daylight-savings-starts-time . #1=((float 60)))
+			                   calendar-standard-time-zone-name)))
+        (holiday-sexp calendar-daylight-savings-ends
+	                  (format "Ende der Sommerzeit – die Uhr wird um eine Stunde zurückgestellt %s"
+		                      (solar-time-string
+			                   (/ calendar-daylight-savings-ends-time . #1#)
+			                   calendar-daylight-time-zone-name)))))
