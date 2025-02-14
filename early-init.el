@@ -17,7 +17,7 @@
 Add this to `after-make-frame-functions' so that new frames do
 not retain the generic background set by the function
 `prot-emacs-avoid-initial-flash-of-light'."
-  (when-let ((theme (car custom-enabled-themes)))
+  (when-let* ((theme (car custom-enabled-themes)))
     (enable-theme theme)))
 
 (defun prot-emacs-avoid-initial-flash-of-light ()
