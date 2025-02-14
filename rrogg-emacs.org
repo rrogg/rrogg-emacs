@@ -29,6 +29,14 @@ isn't needed, so it's disabled.
       initial-scratch-message nil)
 #+end_src
 
+** Disable Ringing the Bell
+
+No audible alerts on errors.
+
+#+begin_src emacs-lisp :tangle "early-init.el"
+(setq ring-bell-function 'ignore)
+#+end_src
+
 ** Disable GUI Bar Components
 
 Display no GUI components other than the =modline=.
