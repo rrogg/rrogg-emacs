@@ -666,3 +666,33 @@ The solar are those in the list `calendar-solar'."
 		                      (solar-time-string
 			                   (/ calendar-daylight-savings-ends-time . #1#)
 			                   calendar-daylight-time-zone-name)))))
+
+(use-package minibuffer
+  :ensure nil
+  :config
+  (setq completion-styles '(basic substring initials flex orderless))
+  (setq completion-category-overrides
+        '((file (styles . (basic partial-completion orderless))))))
+
+(use-package orderless
+  :ensure t
+  :demand t
+  :after minibuffer
+  :config
+  (setq orderless-matching-styles '(orderless-prefixes orderless-regexp))
+  :bind ( :map minibuffer-local-completion-map
+          ("SPC" . nil)
+          ("?" . nil)))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(fontaine magit marginalia modus-themes nerd-icons orderless vertico)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

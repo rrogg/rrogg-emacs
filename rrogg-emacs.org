@@ -1131,3 +1131,31 @@ The solar are those in the list `calendar-solar'."
 			                   calendar-daylight-time-zone-name)))))
 #+end_src
 
+** Completion Styles
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package minibuffer
+  :ensure nil
+  :config
+  (setq completion-styles '(basic substring initials flex orderless))
+  (setq completion-category-overrides
+        '((file (styles . (basic partial-completion orderless))))))
+#+end_src
+
+*** ~orderless~ Completion Style
+
+Some key bindings need to be changed:
+- =SPC= should never complete as it is used it for ~orderless~ groups.
+- The =?= is a regexp construct.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package orderless
+  :ensure t
+  :demand t
+  :after minibuffer
+  :config
+  (setq orderless-matching-styles '(orderless-prefixes orderless-regexp))
+  :bind ( :map minibuffer-local-completion-map
+          ("SPC" . nil)
+          ("?" . nil)))
+#+end_src
