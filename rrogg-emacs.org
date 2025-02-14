@@ -566,37 +566,6 @@ is shown in the mode line.
             "⏻%b%p%% ")))))
 #+end_src
 
-** Org Code Block Settings
-
-Source blocks can be edited in a window that uses the mode for the
-programming language of the block. This window will be spawned on top
-of the current window leaving the window configuration intact. The
-source code will be fontified and indented in the code block as
-expected for the language of the code.
-Source code block templates are defined in
-~org-structure-template-alist~ and can be inserted via the function
-~org-insert-structure-template~ (=C-c C-,=).
-
-#+begin_src emacs-lisp :tangle "init.el"
-(use-package org
-  :ensure nil
-  :config
-  (setq org-confirm-babel-evaluate nil)
-  (setq org-src-window-setup 'current-window)
-  (setq org-edit-src-persistent-message nil)
-  (setq org-src-fontify-natively t)
-  (setq org-src-preserve-indentation t)
-  (setq org-src-tab-acts-natively t)
-  (setq org-edit-src-content-indentation 0)
-  (setq org-structure-template-alist
-        '(("s" . "src")
-          ("e" . "src emacs-lisp")
-          ("t" . "src emacs-lisp :tangle FILENAME")
-          ("x" . "example")
-          ("X" . "export")
-          ("q" . "quote"))))
-#+end_src
-
 ** Vertical Minibuffer Layout - ~vertico~
 
 The default minibuffer layout displays completion candidates in a 2d
@@ -963,6 +932,7 @@ The list =calendar-holidays= contains all days of the year which I
 don’t have be at work. To make them show up in the agenda, the line
 =%%(org-calendar-holiday)= has to appear somewhere below a heading in
 an org file included in the =org-agenda-files=.
+I typically write this line to the =rrogg-org-agenda-settings-file=.
 
 #+begin_src emacs-lisp :tangle "init.el"
 (use-package holidays
@@ -998,6 +968,7 @@ are not holidays in Germany.
 To make them show up in the agenda, the line
 =%%(rrogg-org-calendar-specialdate)= has to appear somewhere in an org
 file included in the =org-agenda-files=.
+I typically write this line to the =rrogg-org-agenda-settings-file=.
 
 #+begin_src emacs-lisp :tangle "init.el"
 (defun rrogg-org-calendar-specialdate ()
@@ -1085,6 +1056,7 @@ integrated into the agenda.
 Similar to the special dates solar dates show up in the agenda by
 including the line =%%(rrogg-org-calendar-solar)= somewhere in one of
 the =org-agenda-files=.
+I typically write this line to the =rrogg-org-agenda-settings-file=.
 
 #+begin_src emacs-lisp :tangle "init.el"
 (defun rrogg-org-calendar-solar ()
@@ -1166,4 +1138,856 @@ Some key bindings need to be changed:
   :bind ( :map minibuffer-local-completion-map
           ("SPC" . nil)
           ("?" . nil)))
+#+end_src
+
+** Org-mode
+
+*** General Settings
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org
+  :ensure nil
+  :init
+  (setq org-directory (expand-file-name "~/org/"))
+  :config
+  (setq org-ellipsis "↴")
+  (setq org-cycle-separator-lines 0)
+  (setq org-read-date-prefer-future 'time)
+  (setq org-fontify-quote-and-verse-blocks t)
+  (setq org-fontify-whole-block-delimiter-line t))
+
+(setq rrogg-org-agenda-settings-file (concat org-directory "agenda_settings.org"))
+#+end_src
+
+*** Org Todo
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org
+  :ensure nil
+  :config
+  (setq org-todo-keywords
+        '((sequence "NEXT(n)" "WAIT(w@)" "CALL(c)" "SITE(s)" "PLAN(p)" "HOLD(h@)" "|" "CANC(C@)" "DONE(d!)")))
+  (setq org-use-fast-todo-selection 'expert)
+  (setq org-enforce-todo-dependencies t)
+  (setq org-enforce-todo-checkbox-dependencies t))
+#+end_src
+
+*** Org Tags
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org
+  :ensure nil
+  :config
+  (setq org-tag-alist nil)
+  (setq org-auto-align-tags nil)
+  (setq org-tags-column 0))
+#+end_src
+
+*** Org Links
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org
+  :ensure nil
+  :bind
+  ( :map global-map
+    ("C-c l" . org-store-link))
+  :config
+  (setq org-link-context-for-files t)
+  (setq org-link-keep-stored-after-insertion nil)
+  (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id))
+#+end_src
+
+*** Org Capture
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org-capture
+  :ensure nil
+  :bind ("C-c c" . org-capture)
+  :config
+  (setq org-capture-templates `(("t" "Task" entry
+                                 (file rrogg-org-default-refile-file)
+                                 ,(concat "* NEXT %^{Title}\n"
+                                          ":PROPERTIES:\n"
+                                          ":CREATED: %U\n"
+                                          ":END:\n\n"
+                                          "%a\n%i%?")
+                                 :empty-lines 1)
+                                ("c" "Call" entry
+                                 (file rrogg-org-default-refile-file)
+                                 ,(concat "* CALL %^{Title}\n"
+                                          ":PROPERTIES:\n"
+                                          ":CREATED: %U\n"
+                                          ":END:\n\n"
+                                          "%a\n%i%?")
+                                 :empty-lines 1))))
+#+end_src
+
+*** Org Logging
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org
+  :ensure nil
+  :config
+  (setq org-log-refile 'time)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+  (setq org-log-note-clock-out nil)
+  (setq org-log-redeadline 'time)
+  (setq org-log-reschedule 'time)
+  (setq org-treat-S-cursor-todo-selection-as-state-change nil))
+#+end_src
+
+*** Org Refile
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org
+  :ensure nil
+  :config
+  (setq org-refile-targets
+        '((rrogg-org-refile-targets . (:maxlevel . 9))
+          (nil . (:maxlevel . 9))))
+  (setq org-refile-use-outline-path t)
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-refile-use-cache t))
+
+(setq rrogg-org-default-refile-file (concat org-directory "refile.org"))
+(setq rrogg-org-refile-targets (append
+                                (list rrogg-org-default-refile-file)
+                                (directory-files-recursively (concat org-directory "private") "\\.org$")
+                                (directory-files-recursively (concat org-directory "crosscontrol") "\\.org$")))
+#+end_src
+
+*** Org Agenda
+
+#+begin_src emacs-lisp :tangle "init.el"
+(setq rrogg-org-agenda-files (append
+                              rrogg-org-refile-targets
+                              (list rrogg-org-agenda-settings-file)))
+(setq rrogg-org-work-agenda-files (append
+                                   (list rrogg-org-default-refile-file)
+                                   (directory-files-recursively (concat org-directory "crosscontrol") "\\.org$")
+                                   (list rrogg-org-agenda-settings-file)))
+(setq rrogg-org-private-agenda-files (append
+                                   (list rrogg-org-default-refile-file)
+                                   (directory-files-recursively (concat org-directory "private") "\\.org$")
+                                   (list rrogg-org-agenda-settings-file)))
+
+(use-package org-agenda
+  :ensure nil
+  :bind ("C-c a" . org-agenda)
+  :config
+  (setq org-agenda-files rrogg-org-agenda-files)
+  (setq org-agenda-format-date #'prot-org-agenda-format-date-aligned)
+  (setq org-agenda-span 'week)
+  (setq org-agenda-start-on-weekday 1)  ; Monday
+  (setq org-agenda-window-setup 'current-window)
+  (setq org-agenda-category-icon-alist
+      '(("\\(Holiday\\|Vacation\\)" "~/templates_labels/icons/holiday.png" nil nil :ascent center)
+        ("Anniv." "~/templates_labels/icons/anniversary.png" nil nil :ascent center)
+        ("Spec. Date" "~/templates_labels/icons/specialdate.png" nil nil :ascent center)
+        ("Time" "~/templates_labels/icons/time.png" nil nil :ascent center)
+        ("Marriage" "~/templates_labels/icons/marriage.gif" nil nil :ascent center)
+        ("Love" "~/templates_labels/icons/love.png" nil nil :ascent center)
+        ("Mourning" "~/templates_labels/icons/mourning.png" nil nil :ascent center)
+        (".*" '(space . (:width (16))))))
+  (setq org-agenda-dim-blocked-tasks nil))
+
+(defun prot-org-agenda-format-date-aligned (date)
+  "Format a DATE string for display in the daily/weekly agenda.
+This function makes sure that dates are aligned for easy reading.
+
+Slightly tweaked version of `org-agenda-format-date-aligned' that
+produces dates with a fixed length."
+  (require 'cal-iso)
+  (let* ((dayname (calendar-day-name date t))
+         (day (cadr date))
+         (day-of-week (calendar-day-of-week date))
+         (month (car date))
+         (monthname (calendar-month-name month t))
+         (year (nth 2 date))
+         (iso-week (org-days-to-iso-week
+                    (calendar-absolute-from-gregorian date)))
+         ;; (weekyear (cond ((and (= month 1) (>= iso-week 52))
+         ;;                  (1- year))
+         ;;                 ((and (= month 12) (<= iso-week 1))
+         ;;                  (1+ year))
+         ;;                 (t year)))
+         (weekstring (if (= day-of-week 1)
+                         (format " (W%02d)" iso-week)
+                       "")))
+    (format "%s %2d %s %4d%s"
+            dayname day monthname year weekstring)))
+
+
+#+end_src
+
+
+**** Agenda Views
+
+How the agenda is rendered is of course customizable.
+Agenda views can be saved to the =org-agenda-custom-commands= list and will be
+presented as an option when calling the agenda dispatcher with =C-c a=.
+
+The agenda setup is drawing heavily from the amazing work of [[http://doc.norang.ca/org-mode.html][Bernt Hansen]].
+
+#+begin_src emacs-lisp :tangle "init.el" :noweb yes
+(setq org-agenda-custom-commands '())
+(add-to-list 'org-agenda-custom-commands
+             <<my-agenda>>)
+(add-to-list 'org-agenda-custom-commands
+             <<my-work-agenda>>)
+(add-to-list 'org-agenda-custom-commands
+             <<my-private-agenda>>)
+#+end_src
+
+***** My Agenda
+
+The main agenda is a composition of multiple agenda commands. The list syntax
+for a composite agenda buffer is
+=(key desc (cmd1 cmd2 ...) general-settings-for-whole-set files)=.
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-agenda
+'(<<my-agenda-key-desc>>
+  (<<my-agenda-cmd-agenda>>
+   <<my-agenda-cmd-refile>>
+   <<my-agenda-cmd-stuck-project>>
+   <<my-agenda-cmd-project>>
+   <<my-agenda-cmd-project-next>>
+   <<my-agenda-cmd-standalone>>
+   <<my-agenda-cmd-project-plan>>
+   <<my-agenda-cmd-waiting>>))
+#+end_src
+
+The agenda can be called by pressing =key= when on the agenda dispatcher. The
+complete key command is =C-c a SPC=.
+A description of the view is passed to the agenda dispatcher via =desc=.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-key-desc
+" " "My Agenda"
+#+end_src
+
+****** Daily/Weekly Agenda
+
+The daily/weekly agenda is at the top of the buffer.
+It is spawned by a non-matching agenda command with syntax =(cmd "" settings)=.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-agenda
+(agenda "")
+#+end_src
+
+****** Headings to Refile
+
+Headings that have been captured but still need to be refiled, appear below the
+daily/weekly agenda.
+There is an agenda command =tags= that matches tags/properties/todos in all
+agenda files. General syntax for matching agenda commands is =(cmd "match"
+settings files)=.
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-agenda-cmd-refile
+(<<my-agenda-cmd-refile-cmd-match>>
+      <<my-agenda-cmd-refile-settings>>)
+#+end_src
+
+All of the headings to be shown here have a tag =:REFILE:= assigned to them, so
+it will search for this tag.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-refile-cmd-match
+tags "REFILE"
+#+end_src
+
+The way the matching headings are presented can be adjusted using settings.
+The header of the refile section is changed.
+Subtrees of a match are skipped in order to prevent a potentially very long list
+of matches.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-refile-settings
+((org-agenda-overriding-header "Headings to Refile")
+ (org-tags-match-list-sublevels nil))
+#+end_src
+
+****** Stuck Projects
+
+A stuck project is one that does not have any subtask (or subproject) that can
+be worked on right now. To unstuck a project, at least one of its tasks has to
+be in a =NEXT= state.
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-agenda-cmd-stuck-project
+(<<my-agenda-cmd-stuck-project-cmd-match>>
+      <<my-agenda-cmd-stuck-project-settings>>)
+#+end_src
+
+Exclude projects that are on hold or cancelled.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-stuck-project-cmd-match
+tags-todo "/!-HOLD-CANC-PLAN"
+#+end_src
+
+Projects can't be found with todo-states alone, because I don't have a dedicated
+state for them.
+Therefore the function [[id:8dc94898-0f38-4aee-b1be-db569f3879a3][=hansen-skip-non-stuck-projects=]] is called, which decides
+which headings to skip for being displayed in this section on the agenda.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-stuck-project-settings
+((org-agenda-overriding-header "Stuck Projects")
+ (org-agenda-skip-function 'hansen-skip-non-stuck-projects))
+#+end_src
+
+****** Projects
+
+Projects that can be worked on are listed in this section. Those projects have
+at least one task in =NEXT= state, that is unblocked and can be worked on.
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-agenda-cmd-project
+(<<my-agenda-cmd-project-cmd-match>>
+      <<my-agenda-cmd-project-settings>>)
+#+end_src
+
+Cancelled and on-hold projects are not displayed.
+Also projects still in planning phase are excluded.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-project-cmd-match
+tags-todo "/!-HOLD-CANC-PLAN"
+#+end_src
+
+The skip function that identifies projects is [[id:6faa31dc-43a0-447a-88d0-fffbe14a3cb0][=hansen-skip-non-projects=]].
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-project-settings
+((org-agenda-overriding-header "Projects")
+ (org-tags-match-list-sublevels 'indented)
+ (org-agenda-skip-function 'hansen-skip-non-projects))
+#+end_src
+
+****** Project Next Tasks
+
+Tasks in =NEXT= state, that move a project towards its goal, are listed in this
+section. If a task is displayed here, it can be worked on right away.
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-agenda-cmd-project-next
+(<<my-agenda-cmd-project-next-cmd-match>>
+      <<my-agenda-cmd-project-next-settings>>)
+#+end_src
+
+Given by the section name, only =NEXT= stated are valid.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-project-next-cmd-match
+tags-todo "/!-HOLD-CANC-WAIT-CALL-SITE"
+#+end_src
+
+[[id:b5c5c889-06c7-46b2-a89d-32327610f5a9][Standalone tasks]] are excluded from this section. Those are tasks that are
+independent from a project and have their own section.
+The skip function is [[id:61741020-afa3-43ed-8db2-ba936490c0cd][=hansen-skip-projects-standalone=]].
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-project-next-settings
+((org-agenda-overriding-header "Project Next Tasks")
+ (org-agenda-skip-function 'hansen-skip-projects-standalone))
+#+end_src
+
+****** Standalone Tasks
+:PROPERTIES:
+:ID:       b5c5c889-06c7-46b2-a89d-32327610f5a9
+:END:
+
+Independent tasks, meaning tasks that are not contributing towards a common goal
+within a project, are displayed separately.
+All headings under this section must have a todo-state. Therefore the agenda
+command =tags-todo= is fitting, because it automatically skips non-task
+headings.
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-agenda-cmd-standalone
+(<<my-agenda-cmd-standalone-cmd-match>>
+      <<my-agenda-cmd-standalone-settings>>)
+#+end_src
+
+All tasks are matched against the following todo-states or tags:
+- Skip tasks tagged =:REFILE:= - those are gathered in section =Headings to
+  Refile=.
+- Skip =CANCELLED= tasks - those are gathered elsewhere.
+- Skip =CALL= tasks - those are only shown in the agenda.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-standalone-cmd-match
+tags-todo "-REFILE/!-CANC-CALL-WAIT-SITE"
+#+end_src
+
+The remaining candidates to display still contain projects and project tasks.
+Those need to be skipped. A function can be assigned to
+=org-agenda-skip-function= in order to do this step.
+The skip function should return =nil= in case the current match should not be
+skipped. In case the match should be skipped, the return value must be a
+position from which the search for the next match should be continued.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-standalone-settings
+((org-agenda-overriding-header "Standalone Tasks")
+ (org-agenda-skip-function 'hansen-skip-project-tasks))
+#+end_src
+
+****** Planned Projects
+
+Projects that are not completely planned and need some more thought before they
+can be started have their own section. I can't work on tasks for those projects
+right now. But still, I want to have them visible in order to drive me to
+complete the planning.
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-agenda-cmd-project-plan
+(<<my-agenda-cmd-project-plan-cmd-match>>
+      <<my-agenda-cmd-project-plan-settings>>)
+#+end_src
+
+All projects to be considered in this section are in =PLANNING= state.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-project-plan-cmd-match
+tags-todo "/!-HOLD-CANC+PLAN"
+#+end_src
+
+The skip function is the same as for regular projects
+([[id:6faa31dc-43a0-447a-88d0-fffbe14a3cb0][=hansen-skip-non-projects=]]).
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-project-plan-settings
+((org-agenda-overriding-header "Planned Projects")
+ (org-agenda-skip-function 'hansen-skip-non-projects))
+#+end_src
+
+****** Waiting and On-Hold Tasks
+
+All tasks that I am waiting on or that I put on hold for now, are listed
+here. This sections prevents that those tasks are forgotten and acts as a
+reminder to reinvestigate why they are blocked.
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-agenda-cmd-waiting
+(<<my-agenda-cmd-waiting-cmd-match>>
+      <<my-agenda-cmd-waiting-settings>>)
+#+end_src
+
+=WAITING= and =HOLD= states are considered to be shown here.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-waiting-cmd-match
+tags-todo "/!-CANC+WAIT|+HOLD"
+#+end_src
+
+Everything that is not a task will be skipped by [[id:25074132-89d0-4e89-98bd-be8e34637b75][=hansen-skip-non-tasks=]].
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-agenda-cmd-waiting-settings
+((org-agenda-overriding-header "Waiting and On-Hold Tasks")
+ (org-agenda-skip-function 'hansen-skip-non-tasks))
+#+end_src
+
+***** My Work Agenda
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-work-agenda
+'(<<my-work-agenda-key-desc>>
+  (<<my-agenda-cmd-agenda>>
+   <<my-agenda-cmd-refile>>
+   <<my-agenda-cmd-stuck-project>>
+   <<my-agenda-cmd-project>>
+   <<my-agenda-cmd-project-next>>
+   <<my-agenda-cmd-standalone>>
+   <<my-agenda-cmd-project-plan>>
+   <<my-agenda-cmd-waiting>>)
+  ((org-agenda-files rrogg-org-work-agenda-files))
+  ((org-agenda-time-grid
+    '((daily today require-timed)
+      (0900 1000 1100 1200 1300
+	    1400 1500 1600 1700)
+      " ....." "-----------------"))))
+#+end_src
+
+The agenda can be called by pressing =key= when on the agenda dispatcher. The
+complete key command is =C-c a w=.
+A description of the view is passed to the agenda dispatcher via =desc=.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-work-agenda-key-desc
+"w" "My Work Agenda"
+#+end_src
+
+***** My Private Agenda
+
+#+begin_src emacs-lisp :tangle no :noweb yes :noweb-ref my-private-agenda
+'(<<my-private-agenda-key-desc>>
+  (<<my-agenda-cmd-agenda>>
+   <<my-agenda-cmd-refile>>
+   <<my-agenda-cmd-stuck-project>>
+   <<my-agenda-cmd-project>>
+   <<my-agenda-cmd-project-next>>
+   <<my-agenda-cmd-standalone>>
+   <<my-agenda-cmd-project-plan>>
+   <<my-agenda-cmd-waiting>>)
+  ((org-agenda-files rrogg-org-private-agenda-files)))
+#+end_src
+
+The agenda can be called by pressing =key= when on the agenda dispatcher. The
+complete key command is =C-c a p=.
+A description of the view is passed to the agenda dispatcher via =desc=.
+
+#+begin_src emacs-lisp :tangle no :noweb-ref my-private-agenda-key-desc
+"p" "My Private Agenda"
+#+end_src
+
+***** Functions for Agenda Building
+
+****** Skip Functions
+
+These functions are used for skipping headings that have been matched during
+creating of the agenda.
+The expected return values are:
+- =position=: In case of identification of a heading that should be skipped, the
+  position from where to continue is the return value.
+- =nil=: In case of a heading that should not be skipped.
+
+******* Skip Projects and Project Tasks
+
+First of, =save-restriction= saves the current buffer’s restrictions when it is
+entered and restores them when it is exited.
+Then potential narrowing of the buffer gets removed with =widen=.
+A local binding for the variable =end-of-subtree= is created using =let=. This
+binding will only be in effect within the body of the =let= statement.
+The variable =end-of-subtree= holds the position of the end of the subtree
+visited by =org-end-of-subtree=. This is possible to do so because it is
+encapsulated in a =save-excursion= special form. This saves point and current
+buffer, executes =org-end-of-subtree= and restores the previous state of point
+and buffer.
+The body of =let= is a conditional control structure =cond=. The body of the
+first condition successfully is returned. If non succeeds the return value is
+=nil=.
+The headings will be checked against [[id:4564159d-6e4b-43a2-9ec5-7650d25501c7][=hansen-is-project-p=]]. If this functions
+returns =t=, the complete subtree will be skipped.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-skip-project-tasks ()
+  "Skip org-headings that are part of a project.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t))))
+      (cond
+       ((hansen-is-project-p)
+        end-of-subtree)
+       (t
+        nil)))))
+#+end_src
+
+******* Skip Non-Projects
+
+This function follows the same structure as [[id:4743e8ba-4c6c-459b-9c26-a669ad843dc8][=hansen-skip-project-tasks=]].
+Headings will be checked against [[id:10e7b990-3bb5-4a81-8015-d0b7c59fa95c][=hansen-is-stuck-project-p=]] and
+[[id:4564159d-6e4b-43a2-9ec5-7650d25501c7][=hansen-is-project-p=]].
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-skip-non-projects ()
+  "Skip org-headings that are not projects.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t))))
+      (cond
+       ((hansen-is-stuck-project-p)
+        end-of-subtree)
+       ((hansen-is-project-p)
+        nil)
+       (t
+        end-of-subtree)))))
+#+end_src
+
+******* Skip Non-Project Tasks
+
+Similar structure to the previous skip functions.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-skip-non-project-tasks ()
+  "Skip org-headings that are projects, subproject tasks or standalone tasks.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t)))
+          (next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((hansen-is-project-p)
+        next-headline)
+       ((and (hansen-is-project-task-p)
+             (equal (org-get-todo-state) "NEXT"))
+        end-of-subtree)
+       ((not (hansen-is-project-task-p))
+        end-of-subtree)
+       (t
+        nil)))))
+#+end_src
+
+******* Skip Projects and Standalone Tasks
+
+Similar structure to the previous skip functions.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-skip-projects-standalone ()
+  "Skip org-headings that are projects or standalone tasks.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((hansen-is-project-p)
+        next-headline)
+       ((and (hansen-is-task-p) (not (hansen-is-project-task-p)))
+        next-headline)
+       ((hansen-is-project-planning-task-p)
+        next-headline)
+       (t
+        nil)))))
+#+end_src
+
+******* Skip Non-Stuck-Projects
+
+Similar structure to the previous skip functions.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-skip-non-stuck-projects ()
+  "Skip org-headings that are projects and not stuck.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((hansen-is-project-planning-task-p)
+        next-headline)
+       ((hansen-is-project-hold-task-p)
+        next-headline)
+       ((hansen-is-stuck-project-p)
+        nil)
+       (t
+        next-headline)))))
+#+end_src
+
+******* Skip Non-Tasks
+
+Similar structure to the previous skip functions.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-skip-non-tasks ()
+  "Skip org-headings that are projects or subprojects.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((hansen-is-task-p)
+        nil)
+       (t
+        next-headline)))))
+#+end_src
+
+****** Identification Functions
+
+The following functions are used to identify what kind of org-heading or task an
+entry is.
+Return value is either =t= or =nil=.
+
+******* Identify Projects
+
+Current buffer's restrictions are saved via =save-restriction= and restored when
+the function is exited.
+Then potential narrowing of the buffer gets removed with =widen=.
+Three local bindings for variables are needed in order to determine if the tasks
+is a project:
+- =end-of-subtree=: Holds the position of the end of the subtree visited by
+  =org-end-of-subtree=.
+- =is-task=: Checks if org-heading has a todo keyword, returns boolean.
+- =has-subtask=: Boolean, default value is =nil=.
+Because this function examines the org-headings coming after the current one,
+point is moved one line forward.
+The following =while= control loop searches for the next org-heading and sets
+the variable =has-subtask= to =t= if the org-heading contains a todo keyword.
+The return value is =t= if both of =is-task= and =has-subtask= are =t=.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-is-project-p ()
+  "A task with a subtask is a project."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t)))
+          (is-task (member (org-get-todo-state) org-todo-keywords-1))
+          (has-subtask))
+      (save-excursion
+        (forward-line 1)
+        (while (and (< (point) end-of-subtree)
+                    (re-search-forward "^\*+ " end-of-subtree t)
+                    (not has-subtask))
+          (when (member (org-get-todo-state) org-todo-keywords-1)
+            (setq has-subtask t))))
+      (and is-task has-subtask))))
+#+end_src
+
+******* Identify Stuck Projects
+
+Similar structure to the previous identify function.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-is-stuck-project-p ()
+  "A task without a subtask in NEXT state is a stuck project."
+  (save-restriction
+    (widen)
+    (if (hansen-is-project-p)
+        (let ((end-of-subtree (save-excursion (org-end-of-subtree t)))
+              (has-next-subtask))
+          (save-excursion
+            (forward-line 1)
+            (while (and (< (point) end-of-subtree) (re-search-forward "^\*+ NEXT\\|CALL " end-of-subtree t) (not has-next-subtask))
+              (setq has-next-subtask t)))
+          (if has-next-subtask
+              nil
+            t))
+      nil)))
+#+end_src
+
+******* Identify Tasks
+
+Similar structure to the previous identify functions.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-is-task-p ()
+  "Check if task has no subtask."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t)))
+          (is-task (member (org-get-todo-state) org-todo-keywords-1))
+          (has-subtask))
+      (save-excursion
+        (forward-line 1)
+        (while (and (< (point) end-of-subtree)
+                    (re-search-forward "^\*+ " end-of-subtree t)
+                    (not has-subtask))
+          (when (member (org-get-todo-state) org-todo-keywords-1)
+            (setq has-subtask t))))
+      (and is-task (not has-subtask)))))
+#+end_src
+
+******* Identify Project Task
+
+Similar structure to the previous identify functions.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-is-project-task-p ()
+  "Check if task is part of a project."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (save-excursion
+        (hansen-find-parent-task)
+        (if (equal (point) parent-task)
+            nil
+          t)))))
+#+end_src
+
+******* Identify Project Planning Task
+
+Similar structure to the previous identify functions.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-is-project-planning-task-p ()
+  "Check if task is part of a project in planning state."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (save-excursion
+        (hansen-find-parent-planning-task)
+        (if (equal (point) parent-task)
+            nil
+          t)))))
+#+end_src
+******* Identify Project Hold Task
+
+Similar structure to the previous identify functions.
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-is-project-hold-task-p ()
+  "Check if task is part of a project in hold state."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (save-excursion
+        (hansen-find-parent-hold-task)
+        (if (equal (point) parent-task)
+            nil
+          t)))))
+#+end_src
+
+****** Search Functions
+
+The following functions are used to search for specific org-headings or tasks.
+Return value is the position of point at the beginning of the heading or =nil=.
+
+******* Find Parent Task
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-find-parent-task ()
+  "Move point to the parent task of a task."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (while (org-up-heading-safe)
+        (when (member (org-get-todo-state) org-todo-keywords-1)
+          (setq parent-task (point))))
+      (goto-char parent-task))))
+#+end_src
+
+******* Find Parent Planning Task
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-find-parent-planning-task ()
+  "Move point to the parent planning task of a task."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (while (org-up-heading-safe)
+        (when (equal (org-get-todo-state) "PLANNING")
+          (setq parent-task (point))))
+      (goto-char parent-task))))
+#+end_src
+
+******* Find Parent Hold Task
+
+#+begin_src emacs-lisp :tangle "init.el"
+(defun hansen-find-parent-hold-task ()
+  "Move point to the parent hold task of a task."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (while (org-up-heading-safe)
+        (when (equal (org-get-todo-state) "HOLD")
+          (setq parent-task (point))))
+      (goto-char parent-task))))
+#+end_src
+
+*** Org Code Block Settings
+
+Source blocks can be edited in a window that uses the mode for the
+programming language of the block. This window will be spawned on top
+of the current window leaving the window configuration intact. The
+source code will be fontified and indented in the code block as
+expected for the language of the code.
+Source code block templates are defined in
+~org-structure-template-alist~ and can be inserted via the function
+~org-insert-structure-template~ (=C-c C-,=).
+
+#+begin_src emacs-lisp :tangle "init.el"
+(use-package org
+  :ensure nil
+  :config
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-src-window-setup 'current-window)
+  (setq org-edit-src-persistent-message nil)
+  (setq org-src-fontify-natively t)
+  (setq org-src-preserve-indentation t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-edit-src-content-indentation 0)
+  (setq org-structure-template-alist
+        '(("s" . "src")
+          ("e" . "src emacs-lisp")
+          ("t" . "src emacs-lisp :tangle FILENAME")
+          ("x" . "example")
+          ("X" . "export")
+          ("q" . "quote"))))
 #+end_src

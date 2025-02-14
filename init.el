@@ -203,24 +203,6 @@
            (battery-status-function
             "⏻%b%p%% ")))))
 
-(use-package org
-  :ensure nil
-  :config
-  (setq org-confirm-babel-evaluate nil)
-  (setq org-src-window-setup 'current-window)
-  (setq org-edit-src-persistent-message nil)
-  (setq org-src-fontify-natively t)
-  (setq org-src-preserve-indentation t)
-  (setq org-src-tab-acts-natively t)
-  (setq org-edit-src-content-indentation 0)
-  (setq org-structure-template-alist
-        '(("s" . "src")
-          ("e" . "src emacs-lisp")
-          ("t" . "src emacs-lisp :tangle FILENAME")
-          ("x" . "example")
-          ("X" . "export")
-          ("q" . "quote"))))
-
 (use-package vertico
   :ensure t
   :hook (after-init . vertico-mode)
@@ -683,3 +665,456 @@ The solar are those in the list `calendar-solar'."
   :bind ( :map minibuffer-local-completion-map
           ("SPC" . nil)
           ("?" . nil)))
+
+(use-package org
+  :ensure nil
+  :init
+  (setq org-directory (expand-file-name "~/org/"))
+  :config
+  (setq org-ellipsis "↴")
+  (setq org-cycle-separator-lines 0)
+  (setq org-read-date-prefer-future 'time)
+  (setq org-fontify-quote-and-verse-blocks t)
+  (setq org-fontify-whole-block-delimiter-line t))
+
+(setq rrogg-org-agenda-settings-file (concat org-directory "agenda_settings.org"))
+
+(use-package org
+  :ensure nil
+  :config
+  (setq org-todo-keywords
+        '((sequence "NEXT(n)" "WAIT(w@)" "CALL(c)" "SITE(s)" "PLAN(p)" "HOLD(h@)" "|" "CANC(C@)" "DONE(d!)")))
+  (setq org-use-fast-todo-selection 'expert)
+  (setq org-enforce-todo-dependencies t)
+  (setq org-enforce-todo-checkbox-dependencies t))
+
+(use-package org
+  :ensure nil
+  :config
+  (setq org-tag-alist nil)
+  (setq org-auto-align-tags nil)
+  (setq org-tags-column 0))
+
+(use-package org
+  :ensure nil
+  :bind
+  ( :map global-map
+    ("C-c l" . org-store-link))
+  :config
+  (setq org-link-context-for-files t)
+  (setq org-link-keep-stored-after-insertion nil)
+  (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id))
+
+(use-package org-capture
+  :ensure nil
+  :bind ("C-c c" . org-capture)
+  :config
+  (setq org-capture-templates `(("t" "Task" entry
+                                 (file rrogg-org-default-refile-file)
+                                 ,(concat "* NEXT %^{Title}\n"
+                                          ":PROPERTIES:\n"
+                                          ":CREATED: %U\n"
+                                          ":END:\n\n"
+                                          "%a\n%i%?")
+                                 :empty-lines 1)
+                                ("c" "Call" entry
+                                 (file rrogg-org-default-refile-file)
+                                 ,(concat "* CALL %^{Title}\n"
+                                          ":PROPERTIES:\n"
+                                          ":CREATED: %U\n"
+                                          ":END:\n\n"
+                                          "%a\n%i%?")
+                                 :empty-lines 1))))
+
+(use-package org
+  :ensure nil
+  :config
+  (setq org-log-refile 'time)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+  (setq org-log-note-clock-out nil)
+  (setq org-log-redeadline 'time)
+  (setq org-log-reschedule 'time)
+  (setq org-treat-S-cursor-todo-selection-as-state-change nil))
+
+(use-package org
+  :ensure nil
+  :config
+  (setq org-refile-targets
+        '((rrogg-org-refile-targets . (:maxlevel . 9))
+          (nil . (:maxlevel . 9))))
+  (setq org-refile-use-outline-path t)
+  (setq org-outline-path-complete-in-steps nil)
+  (setq org-refile-allow-creating-parent-nodes 'confirm)
+  (setq org-refile-use-cache t))
+
+(setq rrogg-org-default-refile-file (concat org-directory "refile.org"))
+(setq rrogg-org-refile-targets (append
+                                (list rrogg-org-default-refile-file)
+                                (directory-files-recursively (concat org-directory "private") "\\.org$")
+                                (directory-files-recursively (concat org-directory "crosscontrol") "\\.org$")))
+
+(setq rrogg-org-agenda-files (append
+                              rrogg-org-refile-targets
+                              (list rrogg-org-agenda-settings-file)))
+(setq rrogg-org-work-agenda-files (append
+                                   (list rrogg-org-default-refile-file)
+                                   (directory-files-recursively (concat org-directory "crosscontrol") "\\.org$")
+                                   (list rrogg-org-agenda-settings-file)))
+(setq rrogg-org-private-agenda-files (append
+                                   (list rrogg-org-default-refile-file)
+                                   (directory-files-recursively (concat org-directory "private") "\\.org$")
+                                   (list rrogg-org-agenda-settings-file)))
+
+(use-package org-agenda
+  :ensure nil
+  :bind ("C-c a" . org-agenda)
+  :config
+  (setq org-agenda-files rrogg-org-agenda-files)
+  (setq org-agenda-format-date #'prot-org-agenda-format-date-aligned)
+  (setq org-agenda-span 'week)
+  (setq org-agenda-start-on-weekday 1)  ; Monday
+  (setq org-agenda-window-setup 'current-window)
+  (setq org-agenda-category-icon-alist
+      '(("\\(Holiday\\|Vacation\\)" "~/templates_labels/icons/holiday.png" nil nil :ascent center)
+        ("Anniv." "~/templates_labels/icons/anniversary.png" nil nil :ascent center)
+        ("Spec. Date" "~/templates_labels/icons/specialdate.png" nil nil :ascent center)
+        ("Time" "~/templates_labels/icons/time.png" nil nil :ascent center)
+        ("Marriage" "~/templates_labels/icons/marriage.gif" nil nil :ascent center)
+        ("Love" "~/templates_labels/icons/love.png" nil nil :ascent center)
+        ("Mourning" "~/templates_labels/icons/mourning.png" nil nil :ascent center)
+        (".*" '(space . (:width (16))))))
+  (setq org-agenda-dim-blocked-tasks nil))
+
+(defun prot-org-agenda-format-date-aligned (date)
+  "Format a DATE string for display in the daily/weekly agenda.
+This function makes sure that dates are aligned for easy reading.
+
+Slightly tweaked version of `org-agenda-format-date-aligned' that
+produces dates with a fixed length."
+  (require 'cal-iso)
+  (let* ((dayname (calendar-day-name date t))
+         (day (cadr date))
+         (day-of-week (calendar-day-of-week date))
+         (month (car date))
+         (monthname (calendar-month-name month t))
+         (year (nth 2 date))
+         (iso-week (org-days-to-iso-week
+                    (calendar-absolute-from-gregorian date)))
+         ;; (weekyear (cond ((and (= month 1) (>= iso-week 52))
+         ;;                  (1- year))
+         ;;                 ((and (= month 12) (<= iso-week 1))
+         ;;                  (1+ year))
+         ;;                 (t year)))
+         (weekstring (if (= day-of-week 1)
+                         (format " (W%02d)" iso-week)
+                       "")))
+    (format "%s %2d %s %4d%s"
+            dayname day monthname year weekstring)))
+
+(setq org-agenda-custom-commands '())
+(add-to-list 'org-agenda-custom-commands
+             '(" " "My Agenda"
+               ((agenda "")
+                (tags "REFILE"
+                      ((org-agenda-overriding-header "Headings to Refile")
+                       (org-tags-match-list-sublevels nil)))
+                (tags-todo "/!-HOLD-CANC-PLAN"
+                      ((org-agenda-overriding-header "Stuck Projects")
+                       (org-agenda-skip-function 'hansen-skip-non-stuck-projects)))
+                (tags-todo "/!-HOLD-CANC-PLAN"
+                      ((org-agenda-overriding-header "Projects")
+                       (org-tags-match-list-sublevels 'indented)
+                       (org-agenda-skip-function 'hansen-skip-non-projects)))
+                (tags-todo "/!-HOLD-CANC-WAIT-CALL-SITE"
+                      ((org-agenda-overriding-header "Project Next Tasks")
+                       (org-agenda-skip-function 'hansen-skip-projects-standalone)))
+                (tags-todo "-REFILE/!-CANC-CALL-WAIT-SITE"
+                      ((org-agenda-overriding-header "Standalone Tasks")
+                       (org-agenda-skip-function 'hansen-skip-project-tasks)))
+                (tags-todo "/!-HOLD-CANC+PLAN"
+                      ((org-agenda-overriding-header "Planned Projects")
+                       (org-agenda-skip-function 'hansen-skip-non-projects)))
+                (tags-todo "/!-CANC+WAIT|+HOLD"
+                      ((org-agenda-overriding-header "Waiting and On-Hold Tasks")
+                       (org-agenda-skip-function 'hansen-skip-non-tasks))))))
+(add-to-list 'org-agenda-custom-commands
+             '("w" "My Work Agenda"
+               ((agenda "")
+                (tags "REFILE"
+                      ((org-agenda-overriding-header "Headings to Refile")
+                       (org-tags-match-list-sublevels nil)))
+                (tags-todo "/!-HOLD-CANC-PLAN"
+                      ((org-agenda-overriding-header "Stuck Projects")
+                       (org-agenda-skip-function 'hansen-skip-non-stuck-projects)))
+                (tags-todo "/!-HOLD-CANC-PLAN"
+                      ((org-agenda-overriding-header "Projects")
+                       (org-tags-match-list-sublevels 'indented)
+                       (org-agenda-skip-function 'hansen-skip-non-projects)))
+                (tags-todo "/!-HOLD-CANC-WAIT-CALL-SITE"
+                      ((org-agenda-overriding-header "Project Next Tasks")
+                       (org-agenda-skip-function 'hansen-skip-projects-standalone)))
+                (tags-todo "-REFILE/!-CANC-CALL-WAIT-SITE"
+                      ((org-agenda-overriding-header "Standalone Tasks")
+                       (org-agenda-skip-function 'hansen-skip-project-tasks)))
+                (tags-todo "/!-HOLD-CANC+PLAN"
+                      ((org-agenda-overriding-header "Planned Projects")
+                       (org-agenda-skip-function 'hansen-skip-non-projects)))
+                (tags-todo "/!-CANC+WAIT|+HOLD"
+                      ((org-agenda-overriding-header "Waiting and On-Hold Tasks")
+                       (org-agenda-skip-function 'hansen-skip-non-tasks))))
+               ((org-agenda-files rrogg-org-work-agenda-files))
+               ((org-agenda-time-grid
+                 '((daily today require-timed)
+                   (0900 1000 1100 1200 1300
+             	    1400 1500 1600 1700)
+                   " ....." "-----------------")))))
+(add-to-list 'org-agenda-custom-commands
+             '("p" "My Private Agenda"
+               ((agenda "")
+                (tags "REFILE"
+                      ((org-agenda-overriding-header "Headings to Refile")
+                       (org-tags-match-list-sublevels nil)))
+                (tags-todo "/!-HOLD-CANC-PLAN"
+                      ((org-agenda-overriding-header "Stuck Projects")
+                       (org-agenda-skip-function 'hansen-skip-non-stuck-projects)))
+                (tags-todo "/!-HOLD-CANC-PLAN"
+                      ((org-agenda-overriding-header "Projects")
+                       (org-tags-match-list-sublevels 'indented)
+                       (org-agenda-skip-function 'hansen-skip-non-projects)))
+                (tags-todo "/!-HOLD-CANC-WAIT-CALL-SITE"
+                      ((org-agenda-overriding-header "Project Next Tasks")
+                       (org-agenda-skip-function 'hansen-skip-projects-standalone)))
+                (tags-todo "-REFILE/!-CANC-CALL-WAIT-SITE"
+                      ((org-agenda-overriding-header "Standalone Tasks")
+                       (org-agenda-skip-function 'hansen-skip-project-tasks)))
+                (tags-todo "/!-HOLD-CANC+PLAN"
+                      ((org-agenda-overriding-header "Planned Projects")
+                       (org-agenda-skip-function 'hansen-skip-non-projects)))
+                (tags-todo "/!-CANC+WAIT|+HOLD"
+                      ((org-agenda-overriding-header "Waiting and On-Hold Tasks")
+                       (org-agenda-skip-function 'hansen-skip-non-tasks))))
+               ((org-agenda-files rrogg-org-private-agenda-files))))
+
+(defun hansen-skip-project-tasks ()
+  "Skip org-headings that are part of a project.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t))))
+      (cond
+       ((hansen-is-project-p)
+        end-of-subtree)
+       (t
+        nil)))))
+
+(defun hansen-skip-non-projects ()
+  "Skip org-headings that are not projects.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t))))
+      (cond
+       ((hansen-is-stuck-project-p)
+        end-of-subtree)
+       ((hansen-is-project-p)
+        nil)
+       (t
+        end-of-subtree)))))
+
+(defun hansen-skip-non-project-tasks ()
+  "Skip org-headings that are projects, subproject tasks or standalone tasks.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t)))
+          (next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((hansen-is-project-p)
+        next-headline)
+       ((and (hansen-is-project-task-p)
+             (equal (org-get-todo-state) "NEXT"))
+        end-of-subtree)
+       ((not (hansen-is-project-task-p))
+        end-of-subtree)
+       (t
+        nil)))))
+
+(defun hansen-skip-projects-standalone ()
+  "Skip org-headings that are projects or standalone tasks.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((hansen-is-project-p)
+        next-headline)
+       ((and (hansen-is-task-p) (not (hansen-is-project-task-p)))
+        next-headline)
+       ((hansen-is-project-planning-task-p)
+        next-headline)
+       (t
+        nil)))))
+
+(defun hansen-skip-non-stuck-projects ()
+  "Skip org-headings that are projects and not stuck.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((hansen-is-project-planning-task-p)
+        next-headline)
+       ((hansen-is-project-hold-task-p)
+        next-headline)
+       ((hansen-is-stuck-project-p)
+        nil)
+       (t
+        next-headline)))))
+
+(defun hansen-skip-non-tasks ()
+  "Skip org-headings that are projects or subprojects.
+If heading should be skipped, return position of end of subtree to continue searching.
+Return nil in case the heading should not be skipped."
+  (save-restriction
+    (widen)
+    (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
+      (cond
+       ((hansen-is-task-p)
+        nil)
+       (t
+        next-headline)))))
+
+(defun hansen-is-project-p ()
+  "A task with a subtask is a project."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t)))
+          (is-task (member (org-get-todo-state) org-todo-keywords-1))
+          (has-subtask))
+      (save-excursion
+        (forward-line 1)
+        (while (and (< (point) end-of-subtree)
+                    (re-search-forward "^\*+ " end-of-subtree t)
+                    (not has-subtask))
+          (when (member (org-get-todo-state) org-todo-keywords-1)
+            (setq has-subtask t))))
+      (and is-task has-subtask))))
+
+(defun hansen-is-stuck-project-p ()
+  "A task without a subtask in NEXT state is a stuck project."
+  (save-restriction
+    (widen)
+    (if (hansen-is-project-p)
+        (let ((end-of-subtree (save-excursion (org-end-of-subtree t)))
+              (has-next-subtask))
+          (save-excursion
+            (forward-line 1)
+            (while (and (< (point) end-of-subtree) (re-search-forward "^\*+ NEXT\\|CALL " end-of-subtree t) (not has-next-subtask))
+              (setq has-next-subtask t)))
+          (if has-next-subtask
+              nil
+            t))
+      nil)))
+
+(defun hansen-is-task-p ()
+  "Check if task has no subtask."
+  (save-restriction
+    (widen)
+    (let ((end-of-subtree (save-excursion (org-end-of-subtree t)))
+          (is-task (member (org-get-todo-state) org-todo-keywords-1))
+          (has-subtask))
+      (save-excursion
+        (forward-line 1)
+        (while (and (< (point) end-of-subtree)
+                    (re-search-forward "^\*+ " end-of-subtree t)
+                    (not has-subtask))
+          (when (member (org-get-todo-state) org-todo-keywords-1)
+            (setq has-subtask t))))
+      (and is-task (not has-subtask)))))
+
+(defun hansen-is-project-task-p ()
+  "Check if task is part of a project."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (save-excursion
+        (hansen-find-parent-task)
+        (if (equal (point) parent-task)
+            nil
+          t)))))
+
+(defun hansen-is-project-planning-task-p ()
+  "Check if task is part of a project in planning state."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (save-excursion
+        (hansen-find-parent-planning-task)
+        (if (equal (point) parent-task)
+            nil
+          t)))))
+
+(defun hansen-is-project-hold-task-p ()
+  "Check if task is part of a project in hold state."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (save-excursion
+        (hansen-find-parent-hold-task)
+        (if (equal (point) parent-task)
+            nil
+          t)))))
+
+(defun hansen-find-parent-task ()
+  "Move point to the parent task of a task."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (while (org-up-heading-safe)
+        (when (member (org-get-todo-state) org-todo-keywords-1)
+          (setq parent-task (point))))
+      (goto-char parent-task))))
+
+(defun hansen-find-parent-planning-task ()
+  "Move point to the parent planning task of a task."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (while (org-up-heading-safe)
+        (when (equal (org-get-todo-state) "PLANNING")
+          (setq parent-task (point))))
+      (goto-char parent-task))))
+
+(defun hansen-find-parent-hold-task ()
+  "Move point to the parent hold task of a task."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading t) (point))))
+      (while (org-up-heading-safe)
+        (when (equal (org-get-todo-state) "HOLD")
+          (setq parent-task (point))))
+      (goto-char parent-task))))
+
+(use-package org
+  :ensure nil
+  :config
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-src-window-setup 'current-window)
+  (setq org-edit-src-persistent-message nil)
+  (setq org-src-fontify-natively t)
+  (setq org-src-preserve-indentation t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-edit-src-content-indentation 0)
+  (setq org-structure-template-alist
+        '(("s" . "src")
+          ("e" . "src emacs-lisp")
+          ("t" . "src emacs-lisp :tangle FILENAME")
+          ("x" . "example")
+          ("X" . "export")
+          ("q" . "quote"))))
