@@ -529,8 +529,8 @@ Specific to the current window's mode line.")
   (setq calendar-time-zone-style 'numeric) ; Emacs 28.1
 
   (require 'cal-dst)
-  (setq calendar-standard-time-zone-name "+0200")
-  (setq calendar-daylight-time-zone-name "+0100"))
+  (setq calendar-standard-time-zone-name "CEST (UTC+2h)")
+  (setq calendar-daylight-time-zone-name "CET (UTC+1h)"))
 
 (use-package holidays
   :ensure nil
@@ -657,12 +657,12 @@ The solar are those in the list `calendar-solar'."
 
 (setq rrogg-calendar-solar
       '((holiday-sexp calendar-daylight-savings-starts
-	                  (format "Beginn der Sommerzeit – die Uhr wird um eine Stunde vorgestellt %s"
+	                  (format "Beginn der Sommerzeit – die Uhr wird um eine Stunde vorgestellt -> %s"
 		                      (solar-time-string
 			                   (/ calendar-daylight-savings-starts-time . #1=((float 60)))
 			                   calendar-standard-time-zone-name)))
         (holiday-sexp calendar-daylight-savings-ends
-	                  (format "Ende der Sommerzeit – die Uhr wird um eine Stunde zurückgestellt %s"
+	                  (format "Ende der Sommerzeit – die Uhr wird um eine Stunde zurückgestellt -> %s"
 		                      (solar-time-string
 			                   (/ calendar-daylight-savings-ends-time . #1#)
 			                   calendar-daylight-time-zone-name)))))
