@@ -377,7 +377,7 @@ face.  Let other buffers have no face.")
 
 (defun prot-modeline-major-mode-help-echo ()
   "Return `help-echo' value for `prot-modeline-major-mode'."
-  (if-let ((parent (get major-mode 'derived-mode-parent)))
+  (if-let* ((parent (get major-mode 'derived-mode-parent)))
       (format "Symbol: `%s'.  Derived from: `%s'" major-mode parent)
     (format "Symbol: `%s'." major-mode)))
 
@@ -404,7 +404,7 @@ face.  Let other buffers have no face.")
 
 (defun prot-modeline--vc-branch-name (file backend)
   "Return capitalized VC branch name for FILE with BACKEND."
-  (when-let ((rev (vc-working-revision file backend))
+  (when-let* ((rev (vc-working-revision file backend))
              (branch (or (vc-git--symbolic-ref file)
                          (substring rev 0 7))))
     (capitalize branch)))
